@@ -495,7 +495,10 @@ export const planSceneWithLlm = createServerFn({ method: "POST" })
     }
 
     const user = `User prompt q:\n"""${prompt}"""\n\nProduce the complete scene specification P as JSON.`;
+    // The fallback must cover unusable-but-successful responses too (empty
+    // content, unparseable JSON), so each attempt parses before it counts.
     let text: string;
+    let raw: LlmPlanRaw;
     let provider: string;
     try {
       if (!hasXaiKey()) throw new Error("XAI_API_KEY not available");
@@ -505,19 +508,20 @@ export const planSceneWithLlm = createServerFn({ method: "POST" })
         maxTokens: 3500,
         temperature: 0.35,
       });
+      raw = parseJsonFromLlm<LlmPlanRaw>(text);
       provider = "grok-4.5";
     } catch (xaiErr) {
       if (!hasGeminiKey()) throw xaiErr;
       text = await geminiChat({
         system: PLAN_SYSTEM,
         user,
-        maxTokens: 3500,
+        maxTokens: 8192,
         temperature: 0.35,
       });
+      raw = parseJsonFromLlm<LlmPlanRaw>(text);
       provider = process.env.GEMINI_TEXT_MODEL?.trim() || "gemini-3.6-flash";
     }
 
-    const raw = parseJsonFromLlm<LlmPlanRaw>(text);
     const plan = normalizePlan(raw, prompt);
     return {
       ok: true as const,

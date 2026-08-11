@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Sky, Stars, PerspectiveCamera } from "@react-three/drei";
+import {
+  OrbitControls,
+  PerformanceMonitor,
+  PerspectiveCamera,
+  Sky,
+  Stars,
+} from "@react-three/drei";
 import {
   Bloom,
   EffectComposer,
@@ -197,21 +203,24 @@ function SceneContent({ world }: { world: WorldSceneType }) {
           0.35,
         ]}
       />
+      {/* normalBias is in WORLD units: keep it at ~1-2 shadow texels
+          (140-unit span / 3072 map ≈ 0.046/texel) so small props keep
+          contact shadows instead of peter-panning. */}
       <directionalLight
         castShadow
         position={sunPos}
         intensity={
           theme === "desert" ? 1.65 : theme === "volcanic" ? 0.95 : 1.3
         }
-        shadow-mapSize-width={4096}
-        shadow-mapSize-height={4096}
+        shadow-mapSize-width={3072}
+        shadow-mapSize-height={3072}
         shadow-camera-far={220}
         shadow-camera-left={-70}
         shadow-camera-right={70}
         shadow-camera-top={70}
         shadow-camera-bottom={-70}
         shadow-bias={-0.0002}
-        shadow-normalBias={0.55}
+        shadow-normalBias={0.08}
         color={theme === "volcanic" ? "#ff8844" : "#fff5e6"}
       />
       {theme === "volcanic" && (
@@ -223,9 +232,10 @@ function SceneContent({ world }: { world: WorldSceneType }) {
         />
       )}
 
-      {/* Aerial haze, not a curtain: fog only begins beyond the world radius
-          so zooming the camera out never washes the scene toward the sky
-          color — distant ridges keep a gentle depth cue instead. */}
+      {/* Aerial haze, not a curtain. Orbit: fog only begins beyond the world
+          radius so zooming the camera out never washes the scene toward the
+          sky color. Walk: a closer band restores ground-level atmospheric
+          perspective and softens the terrain/sky seam at the horizon. */}
       <fog
         attach="fog"
         args={[
@@ -237,9 +247,23 @@ function SceneContent({ world }: { world: WorldSceneType }) {
                 ? "#d4c090"
                 : "#7aacc8",
           world.heightField.worldSize *
-            (theme === "volcanic" ? 0.85 : 1.15),
+            (cameraMode === "walk"
+              ? theme === "volcanic"
+                ? 0.3
+                : 0.45
+              : theme === "volcanic"
+                ? 0.85
+                : 1.15),
           world.heightField.worldSize *
-            (theme === "volcanic" ? 2.6 : theme === "desert" ? 3.4 : 3.1),
+            (cameraMode === "walk"
+              ? theme === "volcanic"
+                ? 1.4
+                : 1.8
+              : theme === "volcanic"
+                ? 2.6
+                : theme === "desert"
+                  ? 3.4
+                  : 3.1),
         ]}
       />
 
@@ -292,7 +316,7 @@ function SceneContent({ world }: { world: WorldSceneType }) {
       {/* Post stack only for the lit view — diagnostic modes (depth /
           normal / instance) must stay untouched raster output. */}
       {viewMode === "lit" && (
-        <EffectComposer multisampling={4}>
+        <EffectComposer multisampling={2}>
           <N8AO
             halfRes
             quality="performance"
@@ -334,6 +358,10 @@ export function WorldViewport() {
   const world = useWorldClaw((s) => s.world);
   const cameraMode = useWorldClaw((s) => s.cameraMode);
   const [ready, setReady] = useState(false);
+  // Render at native dpr where the GPU keeps up; PerformanceMonitor drops
+  // the cap under sustained load so weaker GPUs degrade resolution instead
+  // of frame rate.
+  const [dpr, setDpr] = useState(2);
 
   useEffect(() => {
     setReady(true);
@@ -350,11 +378,15 @@ export function WorldViewport() {
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
+      dpr={[1, dpr]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       className="h-full w-full touch-none"
       onPointerMissed={() => useWorldClaw.getState().setSelectedObjectId(null)}
     >
+      <PerformanceMonitor
+        onDecline={() => setDpr(1.4)}
+        onIncline={() => setDpr(2)}
+      />
       <PerspectiveCamera
         makeDefault
         position={cameraMode === "walk" ? [0, 4, 18] : [42, 34, 42]}

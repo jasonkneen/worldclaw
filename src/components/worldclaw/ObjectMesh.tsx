@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import type { PlacedObject, ViewMode } from "~/lib/worldclaw/types";
 
@@ -82,15 +82,16 @@ export function ObjectMesh({
     0.8,
     0.02,
   );
-  // Emissive intensities sit above the bloom luminance threshold so glowing
-  // props (crystals, fires) read at night/volcanic without blooming the rest.
+  // Emissive luminance must clear the bloom threshold (0.85 in linear HDR,
+  // pre-tonemap) for glowing props to actually bloom: crystal #66aaff has
+  // linear luminance ~0.39 and fire #ff6622 ~0.31, hence the ~3x intensities.
   const emissiveMat = useMemo(() => {
     if (viewMode !== "lit") return null;
     if (obj.kind === "crystal") {
       return new THREE.MeshStandardMaterial({
         color: obj.color,
         emissive: obj.color,
-        emissiveIntensity: 1.1,
+        emissiveIntensity: 3.0,
         roughness: 0.25,
         metalness: 0.4,
       });
@@ -99,11 +100,16 @@ export function ObjectMesh({
       return new THREE.MeshStandardMaterial({
         color: "#ffa055",
         emissive: "#ff6622",
-        emissiveIntensity: 1.8,
+        emissiveIntensity: 3.6,
       });
     }
     return null;
   }, [obj.kind, obj.color, viewMode]);
+
+  useEffect(() => {
+    if (!emissiveMat) return;
+    return () => emissiveMat.dispose();
+  }, [emissiveMat]);
 
   const handleClick = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();

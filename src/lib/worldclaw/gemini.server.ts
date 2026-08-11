@@ -79,11 +79,19 @@ export async function geminiChat(opts: {
     },
   });
   // Thinking models may interleave thought parts — keep answer text only.
-  return parts
+  // maxOutputTokens includes thinking tokens, so a thought-only response is
+  // possible; surface it as an error so callers can fall back or retry.
+  const text = parts
     .filter((p) => !p.thought)
     .map((p) => p.text ?? "")
     .join("")
     .trim();
+  if (!text) {
+    throw new Error(
+      "Gemini returned no answer text (output budget may have been consumed by thinking tokens)",
+    );
+  }
+  return text;
 }
 
 export async function geminiImage(opts: {

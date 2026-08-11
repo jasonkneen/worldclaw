@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { TERRAIN_MATERIALS } from "~/lib/worldclaw/materials";
 import { upsampleHeightField } from "~/lib/worldclaw/upsample";
@@ -38,17 +38,19 @@ export function TerrainMesh({
   viewMode: ViewMode;
   seed?: number;
 }) {
-  const { geometry, material } = useMemo(() => {
-    // Upsample the authored field so the mesh renders at ~2× data density.
+  // Upsample the authored field so the mesh renders at ~2× data density.
+  // Heavy work is keyed on the field alone — switching view modes must not
+  // re-run it.
+  const renderField = useMemo(() => {
     const factor = Math.max(
       1,
       Math.floor((MAX_RENDER_RES - 1) / (heightField.resolution - 1)),
     );
-    const { resolution, worldSize, data, regionId } = upsampleHeightField(
-      heightField,
-      factor,
-      seed,
-    );
+    return upsampleHeightField(heightField, factor, seed);
+  }, [heightField, seed]);
+
+  const geometry = useMemo(() => {
+    const { resolution, worldSize, data } = renderField;
     const geo = new THREE.PlaneGeometry(
       worldSize,
       worldSize,
@@ -56,9 +58,24 @@ export function TerrainMesh({
       resolution - 1,
     );
     geo.rotateX(-Math.PI / 2);
-
     const pos = geo.attributes.position as THREE.BufferAttribute;
-    const colors = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+      const ix = i % resolution;
+      const iy = Math.floor(i / resolution);
+      pos.setY(i, data[iy * resolution + ix] ?? 0);
+    }
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+    return geo;
+  }, [renderField]);
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
+  // Per-view-mode vertex colors are written into the shared geometry.
+  useMemo(() => {
+    const { resolution, worldSize, data, regionId } = renderField;
+    const count = resolution * resolution;
+    const colors = new Float32Array(count * 3);
     const color = new THREE.Color();
     const tmp = new THREE.Color();
     // World-space gradient per one-cell finite difference, independent of
@@ -76,11 +93,10 @@ export function TerrainMesh({
     }
     const hRange = Math.max(0.001, hMax - hMin);
 
-    for (let i = 0; i < pos.count; i++) {
+    for (let i = 0; i < count; i++) {
       const ix = i % resolution;
       const iy = Math.floor(i / resolution);
       const h = data[iy * resolution + ix] ?? 0;
-      pos.setY(i, h);
 
       const ri = regionId[iy * resolution + ix] ?? 0;
       color.copy(categoryColor(plan, ri, viewMode));
@@ -136,32 +152,32 @@ export function TerrainMesh({
       colors[i * 3 + 1] = color.g;
       colors[i * 3 + 2] = color.b;
     }
-    pos.needsUpdate = true;
-    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    geo.computeVertexNormals();
 
-    let mat: THREE.Material;
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  }, [geometry, renderField, plan, viewMode]);
+
+  const material = useMemo(() => {
     if (viewMode === "normal") {
-      mat = new THREE.MeshNormalMaterial({ flatShading: false });
-    } else if (viewMode === "depth") {
-      mat = new THREE.MeshStandardMaterial({
+      return new THREE.MeshNormalMaterial({ flatShading: false });
+    }
+    if (viewMode === "depth") {
+      return new THREE.MeshStandardMaterial({
         vertexColors: true,
         roughness: 1,
         metalness: 0,
         flatShading: false,
       });
-    } else {
-      mat = new THREE.MeshStandardMaterial({
-        vertexColors: true,
-        roughness: 0.86,
-        metalness: 0.03,
-        flatShading: false,
-        envMapIntensity: 0.35,
-      });
     }
+    return new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.86,
+      metalness: 0.03,
+      flatShading: false,
+      envMapIntensity: 0.35,
+    });
+  }, [viewMode]);
 
-    return { geometry: geo, material: mat };
-  }, [heightField, plan, viewMode, seed]);
+  useEffect(() => () => material.dispose(), [material]);
 
   return (
     <mesh
@@ -187,7 +203,9 @@ export function WaterPlane({
   return (
     // Draw after all opaque geometry so submerged terrain/hulls blend
     // consistently; transparent water keeps depthWrite so parts below the
-    // surface still occlude correctly against it.
+    // surface still occlude correctly against it. No transmission — it
+    // forces an extra full scene render per frame for a barely visible
+    // effect under 0.9 opacity.
     <mesh
       rotation={[-Math.PI / 2, 0, 0]}
       position={[0, y, 0]}
@@ -199,10 +217,8 @@ export function WaterPlane({
         color={color}
         roughness={0.12}
         metalness={0.25}
-        transmission={0.18}
-        thickness={0.6}
         transparent
-        opacity={0.92}
+        opacity={0.9}
         ior={1.33}
         envMapIntensity={0.8}
         clearcoat={0.6}

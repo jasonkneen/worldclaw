@@ -99,7 +99,12 @@ export function upsampleHeightField(
       if (detailAmp > 0 && h > 0.12) {
         const wx = (gx / (srcRes - 1) - 0.5) * hf.worldSize;
         const wz = (gy / (srcRes - 1) - 0.5) * hf.worldSize;
-        h += fbm(wx * 0.55, wz * 0.55, seed + 977, 2, 2.1, 0.5) * detailAmp;
+        // fbm is unsigned [0,1] — recenter so the render mesh stays
+        // zero-mean around the gameplay field (objects/walk sample that).
+        h +=
+          (fbm(wx * 0.55, wz * 0.55, seed + 977, 2, 2.1, 0.5) - 0.5) *
+          2 *
+          detailAmp;
       }
       data[y * res + x] = h;
       regionId[y * res + x] =
