@@ -61,7 +61,7 @@ export async function runWorldClawPipeline(
   log(
     "intent",
     "IntentAnalysisAgent",
-    `Parsing open-ended prompt with grok-4.5 (${prompt.length} chars)…`,
+    `Parsing open-ended prompt with LLM planner (${prompt.length} chars)…`,
   );
   check();
 
@@ -81,7 +81,7 @@ export async function runWorldClawPipeline(
       log(
         "intent",
         "IntentAnalysisAgent",
-        "Constraints extracted via LLM — completing P = (R, C_terrain, C_object)",
+        `Constraints extracted via ${result.provider ?? "LLM"} — completing P = (R, C_terrain, C_object)`,
         "success",
       );
       onProgress("planning", 0.12);

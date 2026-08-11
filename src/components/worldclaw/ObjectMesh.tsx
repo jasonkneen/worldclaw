@@ -82,6 +82,28 @@ export function ObjectMesh({
     0.8,
     0.02,
   );
+  // Emissive intensities sit above the bloom luminance threshold so glowing
+  // props (crystals, fires) read at night/volcanic without blooming the rest.
+  const emissiveMat = useMemo(() => {
+    if (viewMode !== "lit") return null;
+    if (obj.kind === "crystal") {
+      return new THREE.MeshStandardMaterial({
+        color: obj.color,
+        emissive: obj.color,
+        emissiveIntensity: 1.1,
+        roughness: 0.25,
+        metalness: 0.4,
+      });
+    }
+    if (obj.kind === "campfire") {
+      return new THREE.MeshStandardMaterial({
+        color: "#ffa055",
+        emissive: "#ff6622",
+        emissiveIntensity: 1.8,
+      });
+    }
+    return null;
+  }, [obj.kind, obj.color, viewMode]);
 
   const handleClick = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
@@ -102,7 +124,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.7, 0.85, 0.9, 8]} />
+            <cylinderGeometry args={[0.7, 0.85, 0.9, 12]} />
           </mesh>
           <mesh
             position={[0, 1.1, 0]}
@@ -111,7 +133,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={secondary}
           >
-            <coneGeometry args={[1.05, 0.85, 8]} />
+            <coneGeometry args={[1.05, 0.85, 12]} />
           </mesh>
         </Group>
       );
@@ -151,7 +173,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.35, 0.45, 2.2, 8]} />
+            <cylinderGeometry args={[0.35, 0.45, 2.2, 12]} />
           </mesh>
           <mesh
             position={[0, 2.3, 0]}
@@ -392,7 +414,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={secondary}
           >
-            <cylinderGeometry args={[0.08, 0.14, 1.8, 6]} />
+            <cylinderGeometry args={[0.08, 0.14, 1.8, 10]} />
           </mesh>
           {[0, 1, 2, 3, 4].map((i) => (
             <mesh
@@ -421,7 +443,7 @@ export function ObjectMesh({
             castShadow
             material={secondary}
           >
-            <cylinderGeometry args={[0.1, 0.14, 0.8, 6]} />
+            <cylinderGeometry args={[0.1, 0.14, 0.8, 10]} />
           </mesh>
           {[0.9, 1.4, 1.85].map((y, i) => (
             <mesh
@@ -432,7 +454,7 @@ export function ObjectMesh({
               onClick={handleClick}
               material={primary}
             >
-              <coneGeometry args={[0.85 - i * 0.18, 0.75, 7]} />
+              <coneGeometry args={[0.85 - i * 0.18, 0.75, 11]} />
             </mesh>
           ))}
         </Group>
@@ -446,7 +468,7 @@ export function ObjectMesh({
             castShadow
             material={secondary}
           >
-            <cylinderGeometry args={[0.1, 0.14, 0.9, 6]} />
+            <cylinderGeometry args={[0.1, 0.14, 0.9, 10]} />
           </mesh>
           <mesh
             position={[0, 1.25, 0]}
@@ -455,7 +477,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <sphereGeometry args={[0.7, 8, 6]} />
+            <sphereGeometry args={[0.7, 16, 12]} />
           </mesh>
         </Group>
       );
@@ -469,7 +491,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.18, 0.22, 1.4, 8]} />
+            <cylinderGeometry args={[0.18, 0.22, 1.4, 12]} />
           </mesh>
           <mesh
             position={[0.35, 0.85, 0]}
@@ -478,7 +500,7 @@ export function ObjectMesh({
             castShadow
             material={primary}
           >
-            <cylinderGeometry args={[0.1, 0.12, 0.55, 6]} />
+            <cylinderGeometry args={[0.1, 0.12, 0.55, 10]} />
           </mesh>
         </Group>
       );
@@ -543,7 +565,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.06, 0.1, 2.4, 6]} />
+            <cylinderGeometry args={[0.06, 0.1, 2.4, 10]} />
           </mesh>
           <mesh
             position={[0, 2.3, 0]}
@@ -552,7 +574,7 @@ export function ObjectMesh({
             castShadow
             material={secondary}
           >
-            <cylinderGeometry args={[0.45, 0.45, 0.08, 16]} />
+            <cylinderGeometry args={[0.45, 0.45, 0.08, 24]} />
           </mesh>
         </Group>
       );
@@ -566,7 +588,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.4, 0.55, 2.4, 8]} />
+            <cylinderGeometry args={[0.4, 0.55, 2.4, 12]} />
           </mesh>
           <mesh
             position={[0, 2.5, 0.35]}
@@ -622,7 +644,7 @@ export function ObjectMesh({
             castShadow
             material={secondary}
           >
-            <cylinderGeometry args={[0.4, 0.45, 0.25, 8]} />
+            <cylinderGeometry args={[0.4, 0.45, 0.25, 12]} />
           </mesh>
           <mesh
             position={[0, 0.9, 0]}
@@ -631,7 +653,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <capsuleGeometry args={[0.25, 0.9, 4, 8]} />
+            <capsuleGeometry args={[0.25, 0.9, 8, 16]} />
           </mesh>
         </Group>
       );
@@ -644,17 +666,7 @@ export function ObjectMesh({
             scale={sel}
             castShadow
             onClick={handleClick}
-            material={
-              viewMode === "lit"
-                ? new THREE.MeshStandardMaterial({
-                    color: obj.color,
-                    emissive: obj.color,
-                    emissiveIntensity: 0.35,
-                    roughness: 0.25,
-                    metalness: 0.4,
-                  })
-                : primary
-            }
+            material={emissiveMat ?? primary}
           >
             <octahedronGeometry args={[0.45, 0]} />
           </mesh>
@@ -671,7 +683,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.7, 0.85, 1.4, 10]} />
+            <cylinderGeometry args={[0.7, 0.85, 1.4, 14]} />
           </mesh>
           <mesh
             position={[0, 0.15, 0.9]}
@@ -706,22 +718,14 @@ export function ObjectMesh({
             castShadow
             material={secondary}
           >
-            <cylinderGeometry args={[0.45, 0.5, 0.15, 8]} />
+            <cylinderGeometry args={[0.45, 0.5, 0.15, 12]} />
           </mesh>
           <mesh
             position={[0, 0.35, 0]}
             scale={sel}
-            material={
-              viewMode === "lit"
-                ? new THREE.MeshStandardMaterial({
-                    color: "#ff8844",
-                    emissive: "#ff6622",
-                    emissiveIntensity: 0.8,
-                  })
-                : primary
-            }
+            material={emissiveMat ?? primary}
           >
-            <coneGeometry args={[0.25, 0.5, 5]} />
+            <coneGeometry args={[0.25, 0.5, 8]} />
           </mesh>
         </Group>
       );
@@ -735,7 +739,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <cylinderGeometry args={[0.45, 0.5, 0.7, 10]} />
+            <cylinderGeometry args={[0.45, 0.5, 0.7, 14]} />
           </mesh>
           <mesh
             position={[0, 0.9, 0]}
@@ -743,7 +747,7 @@ export function ObjectMesh({
             castShadow
             material={secondary}
           >
-            <torusGeometry args={[0.48, 0.06, 6, 12]} />
+            <torusGeometry args={[0.48, 0.06, 10, 20]} />
           </mesh>
         </Group>
       );
@@ -797,7 +801,7 @@ export function ObjectMesh({
             onClick={handleClick}
             material={primary}
           >
-            <capsuleGeometry args={[0.4, 1.6, 4, 8]} />
+            <capsuleGeometry args={[0.4, 1.6, 8, 16]} />
           </mesh>
           <mesh
             position={[0, 1.1, 0.7]}
@@ -805,7 +809,7 @@ export function ObjectMesh({
             castShadow
             material={primary}
           >
-            <sphereGeometry args={[0.35, 8, 6]} />
+            <sphereGeometry args={[0.35, 16, 12]} />
           </mesh>
         </Group>
       );

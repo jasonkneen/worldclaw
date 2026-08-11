@@ -468,7 +468,8 @@ function heightFromLayout(
 export const checkInferenceAvailable = createServerFn({ method: "GET" }).handler(
   async () => {
     const { hasXaiKey } = await import("./xai.server");
-    return { available: hasXaiKey() };
+    const { hasGeminiKey } = await import("./gemini.server");
+    return { available: hasXaiKey() || hasGeminiKey() };
   },
 );
 
@@ -481,22 +482,40 @@ export const planSceneWithLlm = createServerFn({ method: "POST" })
     const { hasXaiKey, xaiChat, parseJsonFromLlm } = await import(
       "./xai.server"
     );
-    if (!hasXaiKey()) {
+    const { hasGeminiKey, geminiChat } = await import("./gemini.server");
+    if (!hasXaiKey() && !hasGeminiKey()) {
       return {
         ok: false as const,
-        error: "XAI_API_KEY not available",
+        error: "No inference key available (XAI_API_KEY / GEMINI_API_KEY)",
         plan: null as ScenePlan | null,
         layoutPrompt: "",
         raw: "",
+        provider: "none",
       };
     }
 
-    const text = await xaiChat({
-      system: PLAN_SYSTEM,
-      user: `User prompt q:\n"""${prompt}"""\n\nProduce the complete scene specification P as JSON.`,
-      maxTokens: 3500,
-      temperature: 0.35,
-    });
+    const user = `User prompt q:\n"""${prompt}"""\n\nProduce the complete scene specification P as JSON.`;
+    let text: string;
+    let provider: string;
+    try {
+      if (!hasXaiKey()) throw new Error("XAI_API_KEY not available");
+      text = await xaiChat({
+        system: PLAN_SYSTEM,
+        user,
+        maxTokens: 3500,
+        temperature: 0.35,
+      });
+      provider = "grok-4.5";
+    } catch (xaiErr) {
+      if (!hasGeminiKey()) throw xaiErr;
+      text = await geminiChat({
+        system: PLAN_SYSTEM,
+        user,
+        maxTokens: 3500,
+        temperature: 0.35,
+      });
+      provider = process.env.GEMINI_TEXT_MODEL?.trim() || "gemini-3.6-flash";
+    }
 
     const raw = parseJsonFromLlm<LlmPlanRaw>(text);
     const plan = normalizePlan(raw, prompt);
@@ -508,6 +527,7 @@ export const planSceneWithLlm = createServerFn({ method: "POST" })
         `Top-down orthographic satellite map of ${plan.sceneType}, ${plan.atmosphere}, distinct terrain regions, no text labels, game world map quality`,
       raw: text.slice(0, 500),
       error: null as string | null,
+      provider,
     };
   });
 
@@ -523,11 +543,11 @@ export const generateLayoutTerrain = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { hasXaiKey, xaiImage } = await import("./xai.server");
-    if (!hasXaiKey()) {
-      throw new Error("XAI_API_KEY not available");
+    const { hasGeminiKey, geminiImage } = await import("./gemini.server");
+    if (!hasXaiKey() && !hasGeminiKey()) {
+      throw new Error("No image key available (XAI_API_KEY / GEMINI_API_KEY)");
     }
 
-    const jpeg = await import("jpeg-js");
     const { writeFile, mkdir } = await import("node:fs/promises");
     const { join } = await import("node:path");
 
@@ -539,33 +559,58 @@ export const generateLayoutTerrain = createServerFn({ method: "POST" })
       `Regions present: ${data.regions.map((r) => `${r.name}(${r.category})`).join(", ")}.`,
     ].join(" ");
 
-    const { b64 } = await xaiImage({
-      prompt: layoutPrompt,
-      quality: data.quality !== false,
-    });
+    let b64: string;
+    let mime: string;
+    try {
+      if (!hasXaiKey()) throw new Error("XAI_API_KEY not available");
+      ({ b64, mime } = await xaiImage({
+        prompt: layoutPrompt,
+        quality: data.quality !== false,
+      }));
+    } catch (xaiErr) {
+      if (!hasGeminiKey()) throw xaiErr;
+      ({ b64, mime } = await geminiImage({ prompt: layoutPrompt }));
+    }
 
     const buf = Buffer.from(b64, "base64");
+    const isPng = mime.includes("png") || buf.subarray(1, 4).toString() === "PNG";
+
+    let rgba: Uint8Array;
+    let width: number;
+    let height: number;
+    if (isPng) {
+      const { PNG } = await import("pngjs");
+      const png = PNG.sync.read(buf);
+      rgba = new Uint8Array(png.data.buffer, png.data.byteOffset, png.data.length);
+      width = png.width;
+      height = png.height;
+    } else {
+      const jpeg = await import("jpeg-js");
+      const decoded = jpeg.decode(buf, { useTArray: true, formatAsRGBA: true });
+      rgba = decoded.data as Uint8Array;
+      width = decoded.width;
+      height = decoded.height;
+    }
+
+    const ext = isPng ? "png" : "jpg";
     const dir = join(process.cwd(), "public", "worldclaw", "layouts", "gen");
     await mkdir(dir, { recursive: true });
     const slug = `${data.theme}_${Date.now().toString(36)}`;
-    await writeFile(join(dir, `${slug}.jpg`), buf);
-
-    const decoded = jpeg.decode(buf, { useTArray: true, formatAsRGBA: true });
-    const rgba = decoded.data as Uint8Array;
+    await writeFile(join(dir, `${slug}.${ext}`), buf);
 
     const terrain = heightFromLayout(
       rgba,
-      decoded.width,
-      decoded.height,
+      width,
+      height,
       data.theme,
-      160,
+      256,
       data.regions,
     );
 
     return {
       ...terrain,
-      layoutImageDataUrl: `data:image/jpeg;base64,${b64}`,
-      layoutImageUrl: `/worldclaw/layouts/gen/${slug}.jpg`,
-      sourcePixels: decoded.width * decoded.height,
+      layoutImageDataUrl: `data:${isPng ? "image/png" : "image/jpeg"};base64,${b64}`,
+      layoutImageUrl: `/worldclaw/layouts/gen/${slug}.${ext}`,
+      sourcePixels: width * height,
     };
   });

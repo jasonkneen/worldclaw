@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Sky, Stars, PerspectiveCamera } from "@react-three/drei";
+import {
+  Bloom,
+  EffectComposer,
+  N8AO,
+  ToneMapping,
+  Vignette,
+} from "@react-three/postprocessing";
+import { ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import { useWorldClaw } from "~/lib/worldclaw/store";
 import { sampleHeight } from "~/lib/worldclaw/terrain";
@@ -165,7 +173,7 @@ function SceneContent({ world }: { world: WorldSceneType }) {
       />
       {theme !== "volcanic" && (
         <Sky
-          distance={450}
+          distance={700}
           sunPosition={sunPos}
           inclination={0.52}
           azimuth={0.25}
@@ -174,7 +182,7 @@ function SceneContent({ world }: { world: WorldSceneType }) {
         />
       )}
       {theme === "volcanic" && (
-        <Stars radius={80} depth={40} count={1200} factor={3} />
+        <Stars radius={320} depth={80} count={2400} factor={5} />
       )}
 
       <ambientLight
@@ -195,13 +203,15 @@ function SceneContent({ world }: { world: WorldSceneType }) {
         intensity={
           theme === "desert" ? 1.65 : theme === "volcanic" ? 0.95 : 1.3
         }
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={160}
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-far={220}
         shadow-camera-left={-70}
         shadow-camera-right={70}
         shadow-camera-top={70}
         shadow-camera-bottom={-70}
+        shadow-bias={-0.0002}
+        shadow-normalBias={0.55}
         color={theme === "volcanic" ? "#ff8844" : "#fff5e6"}
       />
       {theme === "volcanic" && (
@@ -213,6 +223,9 @@ function SceneContent({ world }: { world: WorldSceneType }) {
         />
       )}
 
+      {/* Aerial haze, not a curtain: fog only begins beyond the world radius
+          so zooming the camera out never washes the scene toward the sky
+          color — distant ridges keep a gentle depth cue instead. */}
       <fog
         attach="fog"
         args={[
@@ -223,8 +236,10 @@ function SceneContent({ world }: { world: WorldSceneType }) {
               : theme === "desert"
                 ? "#d4c090"
                 : "#7aacc8",
-          45,
-          theme === "desert" ? 135 : 115,
+          world.heightField.worldSize *
+            (theme === "volcanic" ? 0.85 : 1.15),
+          world.heightField.worldSize *
+            (theme === "volcanic" ? 2.6 : theme === "desert" ? 3.4 : 3.1),
         ]}
       />
 
@@ -232,6 +247,7 @@ function SceneContent({ world }: { world: WorldSceneType }) {
         heightField={world.heightField}
         plan={world.plan}
         viewMode={viewMode}
+        seed={world.seed}
       />
 
       {showWater && (
@@ -265,13 +281,36 @@ function SceneContent({ world }: { world: WorldSceneType }) {
           makeDefault
           enableDamping
           dampingFactor={0.08}
-          minDistance={8}
-          maxDistance={150}
+          minDistance={6}
+          maxDistance={240}
           maxPolarAngle={Math.PI * 0.48}
           target={[0, 2, 0]}
         />
       )}
       <WalkController enabled={cameraMode === "walk"} world={world} />
+
+      {/* Post stack only for the lit view — diagnostic modes (depth /
+          normal / instance) must stay untouched raster output. */}
+      {viewMode === "lit" && (
+        <EffectComposer multisampling={4}>
+          <N8AO
+            halfRes
+            quality="performance"
+            aoRadius={2.2}
+            distanceFalloff={2.5}
+            intensity={2.4}
+            color="#06121a"
+          />
+          <Bloom
+            mipmapBlur
+            intensity={0.45}
+            luminanceThreshold={0.85}
+            luminanceSmoothing={0.18}
+          />
+          <Vignette eskil={false} offset={0.24} darkness={0.48} />
+          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        </EffectComposer>
+      )}
     </>
   );
 }
@@ -311,7 +350,7 @@ export function WorldViewport() {
   return (
     <Canvas
       shadows
-      dpr={[1, 1.75]}
+      dpr={[1, 2]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       className="h-full w-full touch-none"
       onPointerMissed={() => useWorldClaw.getState().setSelectedObjectId(null)}
@@ -321,7 +360,7 @@ export function WorldViewport() {
         position={cameraMode === "walk" ? [0, 4, 18] : [42, 34, 42]}
         fov={50}
         near={0.2}
-        far={400}
+        far={900}
       />
       {world ? <SceneContent world={world} /> : <EmptyScene />}
     </Canvas>

@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { TERRAIN_MATERIALS } from "~/lib/worldclaw/materials";
+import { upsampleHeightField } from "~/lib/worldclaw/upsample";
 import type { ScenePlan, HeightField, ViewMode } from "~/lib/worldclaw/types";
+
+/** Vertex density target for the rendered terrain (per side). */
+const MAX_RENDER_RES = 384;
 
 function categoryColor(
   plan: ScenePlan,
@@ -27,13 +31,24 @@ export function TerrainMesh({
   heightField,
   plan,
   viewMode,
+  seed = 0,
 }: {
   heightField: HeightField;
   plan: ScenePlan;
   viewMode: ViewMode;
+  seed?: number;
 }) {
   const { geometry, material } = useMemo(() => {
-    const { resolution, worldSize, data, regionId } = heightField;
+    // Upsample the authored field so the mesh renders at ~2× data density.
+    const factor = Math.max(
+      1,
+      Math.floor((MAX_RENDER_RES - 1) / (heightField.resolution - 1)),
+    );
+    const { resolution, worldSize, data, regionId } = upsampleHeightField(
+      heightField,
+      factor,
+      seed,
+    );
     const geo = new THREE.PlaneGeometry(
       worldSize,
       worldSize,
@@ -46,6 +61,10 @@ export function TerrainMesh({
     const colors = new Float32Array(pos.count * 3);
     const color = new THREE.Color();
     const tmp = new THREE.Color();
+    // World-space gradient per one-cell finite difference, independent of
+    // render resolution (calibrated to match the original 160-grid look).
+    const cellSize = worldSize / (resolution - 1);
+    const slopeScale = 0.42 / (2 * cellSize);
 
     // Precompute min/max height for depth mode
     let hMin = Infinity;
@@ -78,7 +97,7 @@ export function TerrainMesh({
         const hD = data[Math.max(0, iy - e) * resolution + ix] ?? h;
         const hU =
           data[Math.min(resolution - 1, iy + e) * resolution + ix] ?? h;
-        const slope = Math.min(1, Math.hypot(hR - hL, hU - hD) * 0.28);
+        const slope = Math.min(1, Math.hypot(hR - hL, hU - hD) * slopeScale);
 
         // Blend toward rock on steep slopes
         if (slope > 0.25) {
@@ -108,8 +127,7 @@ export function TerrainMesh({
         color.offsetHSL(0, 0, -slope * 0.22);
 
         // Subtle triplanar-style noise via hash of position
-        const n =
-          Math.sin(ix * 12.9898 + iy * 78.233) * 43758.5453;
+        const n = Math.sin(ix * 12.9898 + iy * 78.233) * 43758.5453;
         const grain = (n - Math.floor(n)) * 0.06 - 0.03;
         color.offsetHSL(0, 0, grain);
       }
@@ -143,7 +161,7 @@ export function TerrainMesh({
     }
 
     return { geometry: geo, material: mat };
-  }, [heightField, plan, viewMode]);
+  }, [heightField, plan, viewMode, seed]);
 
   return (
     <mesh
@@ -167,10 +185,14 @@ export function WaterPlane({
   color?: string;
 }) {
   return (
+    // Draw after all opaque geometry so submerged terrain/hulls blend
+    // consistently; transparent water keeps depthWrite so parts below the
+    // surface still occlude correctly against it.
     <mesh
       rotation={[-Math.PI / 2, 0, 0]}
       position={[0, y, 0]}
       receiveShadow
+      renderOrder={10}
     >
       <planeGeometry args={[worldSize * 1.45, worldSize * 1.45, 64, 64]} />
       <meshPhysicalMaterial
@@ -183,6 +205,11 @@ export function WaterPlane({
         opacity={0.92}
         ior={1.33}
         envMapIntensity={0.8}
+        clearcoat={0.6}
+        clearcoatRoughness={0.25}
+        polygonOffset
+        polygonOffsetFactor={-1}
+        polygonOffsetUnits={-2}
       />
     </mesh>
   );
