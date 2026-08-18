@@ -1,0 +1,302 @@
+{
+  "version": 2,
+  "paper": {
+    "title": "WorldClaw: Agentic 3D Open-World Generation at Scale",
+    "pdf": "2608.05248v1.pdf",
+    "sha256": "8369dfddc7fa5658fb589bb2723f11057c3dffc35f14b081cec0463980758a03",
+    "qualitativeFigures": [4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15]
+  },
+  "claimPolicy": {
+    "aggregation": "all_cases_and_all_shared_axes",
+    "minimumIndependentReviewers": 4,
+    "reviewAggregation": "four_member_conservative_panel",
+    "strictWinAxesRequiredAtSuiteMedian": 4,
+    "sharedAxes": [
+      "global_terrain_organization",
+      "regional_content_richness",
+      "material_and_lighting_quality",
+      "ground_level_stability",
+      "prompt_alignment",
+      "diagnostic_correctness"
+    ],
+    "note": "This preregistered benchmark supports only a model-panel qualitative judgment over eleven selected WorldClaw figures and six axes. It does not establish whole-paper or scientific superiority."
+  },
+  "viewContract": {
+    "globalViews": 1,
+    "regionalViews": 4,
+    "walkViews": 4,
+    "diagnosticsPerWalkView": ["instance", "depth", "normal"],
+    "requiredRegisteredBrowserViews": ["map", "isometric", "oblique", "walk"]
+  },
+  "cases": [
+    {
+      "id": "figure-04-tropical-pirate-stronghold",
+      "figure": 4,
+      "pdfPage": 13,
+      "title": "Tropical pirate stronghold",
+      "referenceImage": "screenshots/paper-reference/page-13.png",
+      "referenceSha256": "476eaec63f723fedc24070ec4edae543acc0c47a60e5ea56ef5818273d66c66e",
+      "referencePanelCrop": { "x": 106, "y": 175, "width": 706, "height": 783 },
+      "referencePanelSha256": "fffdf75aa96ee1a274b6e6ff09fb547077f80485664a67c4c1a51cb2cdda96e1",
+      "prompt": "Please create a tropical island that serves as a pirate stronghold, inspired by the adventurous atmosphere of One Piece.",
+      "expectedText": "tropical island",
+      "terrainRelationships": [
+        "irregular coastline",
+        "separated land regions",
+        "distinct coastal regions"
+      ],
+      "objectFamilies": ["dense tropical vegetation", "settlements", "docks", "ships"],
+      "regionalReadability": ["pirate settlement", "harbor", "ship anchorage", "vegetated interior"]
+    },
+    {
+      "id": "figure-05-river-canyon-tribal-settlements",
+      "figure": 5,
+      "pdfPage": 14,
+      "title": "Canyon with tribal settlements",
+      "referenceImage": "screenshots/paper-reference/page-14.png",
+      "referenceSha256": "919aaecf6bf070e756df2463b7d579433652ddae3e9108c886c005b9ff4008d9",
+      "referencePanelCrop": { "x": 106, "y": 178, "width": 706, "height": 780 },
+      "referencePanelSha256": "83513036780befd4aaa01812ee72cccb8ac3c7f9200885bc7ecee298b5a2619c",
+      "prompt": "Please create a canyon scene with a river flowing through the entire canyon. Primitive tribal villages are scattered along the surrounding cliffs and valley floor.",
+      "expectedText": "canyon scene",
+      "terrainRelationships": [
+        "continuous river",
+        "canyon walls",
+        "valley floor",
+        "substantial elevation changes"
+      ],
+      "objectFamilies": ["tribal huts", "village props", "vegetation", "bridges"],
+      "regionalReadability": [
+        "cliff settlement",
+        "valley settlement",
+        "river crossing",
+        "vegetated riverbank"
+      ]
+    },
+    {
+      "id": "figure-06-desert-battlefield",
+      "figure": 6,
+      "pdfPage": 15,
+      "title": "Thrilling battlefield in the desert",
+      "referenceImage": "screenshots/paper-reference/page-15.png",
+      "referenceSha256": "36abd4579e874fe0e99cf6899856cb79b3b352717706373b6f5c0d76d031d2bd",
+      "referencePanelCrop": { "x": 106, "y": 176, "width": 706, "height": 782 },
+      "referencePanelSha256": "96fd7ebcd5509c78e76948480570ea6bc744180e8325dea32d581e647a0c0647",
+      "prompt": "Please create a desert battlefield inspired by PUBG's desert maps, designed as an open environment suitable for large-scale PvP combat.",
+      "expectedText": "desert battlefield",
+      "terrainRelationships": [
+        "layered rocky landforms",
+        "broad open combat areas",
+        "connected compounds"
+      ],
+      "objectFamilies": ["buildings", "defensive structures", "watchtowers", "vehicles"],
+      "regionalReadability": [
+        "open battlefield",
+        "fortified compound",
+        "vehicle staging area",
+        "communications outpost"
+      ]
+    },
+    {
+      "id": "figure-07-snow-command-valley",
+      "figure": 7,
+      "pdfPage": 16,
+      "title": "Snow-covered mountain valley with futuristic facilities",
+      "referenceImage": "screenshots/paper-reference/page-16.png",
+      "referenceSha256": "dce0b4d15450376280b55759b4f6d6a2fdd2a60fce46b31bb6c45e2b1fc79d7d",
+      "referencePanelCrop": { "x": 106, "y": 175, "width": 706, "height": 783 },
+      "referencePanelSha256": "e594575fcdbdc0549a68b9dcf1862203aa7f6a5b4d905defc16d633d82530ac6",
+      "prompt": "Please create a realistic snow-covered mountain valley inspired by the style of Command & Conquer: Red Alert, featuring a variety of futuristic high-tech buildings scattered throughout the landscape.",
+      "expectedText": "snow-covered mountain valley",
+      "terrainRelationships": [
+        "enclosing mountain terrain",
+        "snow valley",
+        "multiple functional regions"
+      ],
+      "objectFamilies": [
+        "futuristic facilities",
+        "communication structures",
+        "vehicles",
+        "defensive structures"
+      ],
+      "regionalReadability": [
+        "communications facility",
+        "vehicle outpost",
+        "industrial base",
+        "open snow corridor"
+      ]
+    },
+    {
+      "id": "figure-09-medieval-diverse-terrain",
+      "figure": 9,
+      "pdfPage": 32,
+      "title": "Medieval-style village across diverse terrain",
+      "referenceImage": "screenshots/paper-reference/page-32.png",
+      "referenceSha256": "1bfbbe8fe0526f97825ed823621c4fddafa79d75c40befb44730ebfe630a795f",
+      "referencePanelCrop": { "x": 106, "y": 199, "width": 706, "height": 780 },
+      "referencePanelSha256": "bf055376b59a6dd53f6a75649dcc172b57f5faa7bb3363d5020168896d4c0a33",
+      "prompt": "Please create a medieval-style village scene with diverse terrain, including snow-capped mountains, plains, bodies of water, and a desert, populated with animals.",
+      "expectedText": "medieval-style village",
+      "terrainRelationships": [
+        "snow-capped mountains",
+        "forested plains",
+        "bodies of water",
+        "desert region"
+      ],
+      "objectFamilies": ["village buildings", "windmills", "vegetation", "animals"],
+      "regionalReadability": [
+        "mountain village",
+        "waterside village",
+        "plain settlement",
+        "desert settlement"
+      ]
+    },
+    {
+      "id": "figure-10-frozen-riverside-village",
+      "figure": 10,
+      "pdfPage": 33,
+      "title": "Snow-covered riverside village",
+      "referenceImage": "screenshots/paper-reference/page-33.png",
+      "referenceSha256": "9eecba725700dc53d6b76395f60877133d55d99f910198e53e7dba794ce311ef",
+      "referencePanelCrop": { "x": 143, "y": 276, "width": 938, "height": 1040 },
+      "referencePanelSha256": "b503910a4bd38865d4a4b831b4e19a89ab4e5c3081b006b27b9b41edbf91fc77",
+      "prompt": "Please create a snow-covered village scene set in a frozen landscape, with the village distributed along both sides of a river.",
+      "expectedText": "snow-covered village",
+      "terrainRelationships": ["frozen river", "mountainous landscape", "two populated riverbanks"],
+      "objectFamilies": ["timber houses", "watchtowers", "wells", "snow vegetation"],
+      "regionalReadability": [
+        "left-bank village",
+        "right-bank village",
+        "frozen crossing",
+        "mountain edge"
+      ]
+    },
+    {
+      "id": "figure-11-desert-dragon-camp",
+      "figure": 11,
+      "pdfPage": 34,
+      "title": "Desert adventure camp surrounded by dragons",
+      "referenceImage": "screenshots/paper-reference/page-34.png",
+      "referenceSha256": "f5f6d63b752a4edcc2a4c4830fb271ca22cf504e135eaa9e8ee8eb7b98b18064",
+      "referencePanelCrop": { "x": 143, "y": 277, "width": 938, "height": 1039 },
+      "referencePanelSha256": "5180f0ab1f02d7268ff353a3421e3ca793117da7bba40c28caae2ac74dd1e7dc",
+      "prompt": "Please create a desert adventure camp surrounded by several massive dragons coiling around the landscape.",
+      "expectedText": "desert adventure camp",
+      "terrainRelationships": [
+        "layered desert terrain",
+        "camp terraces",
+        "dragon-scale open spaces"
+      ],
+      "objectFamilies": ["settlements", "watchtowers", "tents", "massive dragons"],
+      "regionalReadability": [
+        "adventure camp",
+        "watchtower ridge",
+        "dragon perch",
+        "open desert route"
+      ]
+    },
+    {
+      "id": "figure-12-japanese-island-towns",
+      "figure": 12,
+      "pdfPage": 35,
+      "title": "Island with Japanese-style towns",
+      "referenceImage": "screenshots/paper-reference/page-35.png",
+      "referenceSha256": "4ccdc7e842a12d214043eb30e1631cd5a67dfd8c7aa856d94fb436082b0897f5",
+      "referencePanelCrop": { "x": 106, "y": 206, "width": 706, "height": 780 },
+      "referencePanelSha256": "a89bfac819e6934070dac8231b314658d8c44bb675d8c398ac466c65bf2efad2",
+      "prompt": "Please create an island scene with multiple Japanese-style towns scattered across the island, surrounded by the ocean.",
+      "expectedText": "Japanese-style towns",
+      "terrainRelationships": [
+        "ocean coastline",
+        "vegetated hills",
+        "multiple separated settlements"
+      ],
+      "objectFamilies": ["Japanese houses", "shrines", "vegetation", "town props"],
+      "regionalReadability": [
+        "coastal town",
+        "hill town",
+        "shrine district",
+        "waterside settlement"
+      ]
+    },
+    {
+      "id": "figure-13-volcanic-demon-lair",
+      "figure": 13,
+      "pdfPage": 36,
+      "title": "Volcanic demon lair",
+      "referenceImage": "screenshots/paper-reference/page-36.png",
+      "referenceSha256": "edf915c0b2f526dfcfb54f2fcbea505c6af72b17cb51628d8b05bf5c83a0bf2b",
+      "referencePanelCrop": { "x": 143, "y": 277, "width": 938, "height": 1039 },
+      "referencePanelSha256": "dfe35d4fce90dd55e8bdc443ced679c3d4fc1defd67bfb7de99ab9c6d9070a4b",
+      "prompt": "Please create a volcanic landscape filled with glowing lava, where the entire volcano resembles the lair of a powerful demon.",
+      "expectedText": "volcanic landscape",
+      "terrainRelationships": ["volcanic landforms", "connected lava flows", "central lair"],
+      "objectFamilies": ["demonic structures", "ritual monuments", "fortifications", "lava props"],
+      "regionalReadability": [
+        "central demon lair",
+        "lava channel",
+        "ritual court",
+        "fortified volcanic rim"
+      ]
+    },
+    {
+      "id": "figure-14-gemstone-mine",
+      "figure": 14,
+      "pdfPage": 37,
+      "title": "Gemstone mining site",
+      "referenceImage": "screenshots/paper-reference/page-37.png",
+      "referenceSha256": "feff3c41cf22bdb210590ec96e932536c7fb7451858e8e7a58e03e5985cedf44",
+      "referencePanelCrop": { "x": 106, "y": 211, "width": 706, "height": 776 },
+      "referencePanelSha256": "65168589247d1f856c93fdf96f5ae231a9f673419a9eb56f526a98a79bfb2f77",
+      "prompt": "Please create a mining site filled with rich gemstone deposits, with excavation equipment and construction areas actively extracting the resources.",
+      "expectedText": "mining site",
+      "terrainRelationships": [
+        "terraced excavation",
+        "exposed deposits",
+        "connected construction levels"
+      ],
+      "objectFamilies": [
+        "gemstone deposits",
+        "excavation equipment",
+        "mine structures",
+        "construction machinery"
+      ],
+      "regionalReadability": [
+        "active pit",
+        "processing level",
+        "equipment yard",
+        "exposed gemstone seam"
+      ]
+    },
+    {
+      "id": "figure-15-hobbit-mountain-valley",
+      "figure": 15,
+      "pdfPage": 38,
+      "title": "Mountain valley with Hobbit-style villages",
+      "referenceImage": "screenshots/paper-reference/page-38.png",
+      "referenceSha256": "8a1481ccce0c406c677fe01807e2721580f8d91948088ee0a211885e4cb2c5ac",
+      "referencePanelCrop": { "x": 143, "y": 277, "width": 938, "height": 1039 },
+      "referencePanelSha256": "35259b1b6ae93669617c50d585d0d33238c7a3cd79dcf354f78feaf3d4f5e475",
+      "prompt": "Please create a realistic mountain valley with scattered Hobbit-style villages nestled beneath the surrounding hills.",
+      "expectedText": "mountain valley",
+      "terrainRelationships": [
+        "steep enclosing hills",
+        "valley floor",
+        "water",
+        "embedded settlements"
+      ],
+      "objectFamilies": [
+        "round-door hillside homes",
+        "village structures",
+        "vegetation",
+        "waterfront props"
+      ],
+      "regionalReadability": [
+        "hillside village",
+        "valley village",
+        "waterside village",
+        "open pastoral area"
+      ]
+    }
+  ]
+}

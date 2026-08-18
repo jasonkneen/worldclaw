@@ -1,0 +1,30 @@
+# secrets / env
+.xai_env
+.env
+.env.local
+.env.*.local
+
+# deps
+node_modules/
+
+# local duplicate of the tracked research paper in attachments/
+/2608.05248v1.pdf
+
+# build / deploy output
+dist/
+build/
+.vercel/
+.output/
+.nitro/
+.tanstack/
+
+# generated QA / agent output
+output/
+artifacts/
+screenshots/*
+!screenshots/.gitkeep
+
+# tooling caches
+.playwright-mcp/
+.DS_Store
+*.log

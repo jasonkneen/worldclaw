@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "name": "WorldClaw map-to-multiview reference gate",
+  "authorityOrder": [
+    "canonical_semantic_map",
+    "approved_multiview_concept_sheet",
+    "structured_scene_plan"
+  ],
+  "sourceRoles": {
+    "canonical_semantic_map": {
+      "role": "geometry_authority",
+      "constrains": [
+        "land_water_topology",
+        "shoreline",
+        "region_layout",
+        "landmark_handedness",
+        "hero_counts",
+        "hero_map_anchors"
+      ]
+    },
+    "approved_multiview_concept_sheet": {
+      "role": "appearance_authority",
+      "constrains": [
+        "silhouette",
+        "construction_system",
+        "material_family",
+        "palette",
+        "density",
+        "camera_intent"
+      ],
+      "note": "Perspective panels are semantic/look references until anchor correspondences support pixel registration."
+    },
+    "structured_scene_plan": {
+      "role": "semantic_authority",
+      "constrains": [
+        "named_regions",
+        "object_requirements",
+        "exact_hero_counts",
+        "spatial_relationships"
+      ]
+    }
+  },
+  "requiredFinalViews": {
+    "map": {
+      "projection": "orthographic",
+      "aspect": "1:1",
+      "orientation": "north_up",
+      "comparisonMode": "binary_land_water_and_semantic_ids"
+    },
+    "isometric": {
+      "projection": "orthographic",
+      "comparisonMode": "beauty_object_ids_depth"
+    },
+    "oblique": {
+      "projection": "perspective",
+      "comparisonMode": "beauty_object_ids_depth"
+    },
+    "walk": {
+      "projection": "perspective",
+      "eyeHeightMeters": 1.65,
+      "comparisonMode": "beauty_object_ids_depth"
+    }
+  },
+  "hardThresholds": {
+    "landWaterIoU": 0.95,
+    "shorelineBoundaryF1": 0.95,
+    "shorelineTolerancePixelsAt1024": 4,
+    "shorelineP95DistancePixelsAt1024": 6,
+    "alternateOrientationImprovementFailure": 0.02,
+    "leakageBoundaryTolerancePixelsAt1024": 4,
+    "falseWaterOnLandRatio": 0.005,
+    "missingCanonicalWaterRatio": 0.01,
+    "minimumHeroPixelsInAnyView": 64,
+    "heroCount": "exact",
+    "materialFamilyMacroF1": 0.9,
+    "requiredConstructionTags": "exact",
+    "minimumWaterTerrainClearanceMeters": 0.02,
+    "nonFiniteDepthPixels": 0
+  },
+  "failurePolicy": {
+    "aggregation": "logical_and",
+    "missingInput": "unavailable_and_failed",
+    "modelReviewMayOverrideHardFailure": false,
+    "requiredArtifacts": [
+      "reference_land_water_mask",
+      "render_land_water_mask",
+      "shoreline_overlay",
+      "difference_mask",
+      "per_view_beauty_capture",
+      "per_view_camera_metadata",
+      "deterministic_metric_report",
+      "vision_review"
+    ]
+  }
+}

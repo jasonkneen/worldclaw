@@ -1,0 +1,911 @@
+{
+  "version": 1,
+  "library": {
+    "uri": "/worldclaw/assets/worldclaw-kit.glb",
+    "format": "glb",
+    "sourceUpAxis": "Z",
+    "runtimeUpAxis": "Y",
+    "metersPerUnit": 1,
+    "fileBudgetBytes": 5000000,
+    "maxTriangles": 65000,
+    "instanceScalePolicy": {
+      "assetHeightAtScaleOne": "targetHeightMeters",
+      "placedObjectScaleSemantic": "legacy_base_times_jitter",
+      "runtimeScaleFormula": "placedObject.scale / legacyBaseScaleByKind[object.kind]",
+      "legacyBaseScaleByKind": {
+        "palm": 1.6, "tree": 1.4, "pine": 1.8, "rock": 0.8, "boulder": 1.3,
+        "cactus": 1, "hut": 1.2, "house": 1.6, "building": 2.4, "bunker": 2,
+        "barn": 2.2, "tower": 2.2, "watchtower": 2.5, "ship": 3.2, "boat": 1.4,
+        "vehicle": 1.4, "tank": 1.8, "pagoda": 2.8, "torii": 2.2,
+        "bridge": 3.5, "dragon": 4, "windmill": 3.5, "mine": 2,
+        "crystal": 0.9, "antenna": 2.8, "satellite": 1.6, "dock": 2.5,
+        "fence": 1, "campfire": 0.7, "tent": 1.1, "statue": 1.5,
+        "well": 1, "crate": 0.55, "market": 1.8
+      }
+    }
+  },
+  "capabilities": {
+    "version": 1,
+    "appearanceSelection": {
+      "normalization": "lowercase_ascii_tokens_v1",
+      "matchFields": ["id", "appearanceTerms", "materialIds"],
+      "selectionOrder": ["exact_variant_id", "most_matching_appearance_terms", "default_variant"],
+      "tieBreak": "manifest_order",
+      "unmatchedBehavior": "use_default_variant",
+      "note": "Version 1 permits multiple authored nodes per prototype. Variant nodes inherit prototype meter units unless they publish variant-level targetHeightMeters and collider overrides."
+    },
+    "materialVocabulary": {
+      "timber_structural_dark": {"blenderMaterial": "MAT-wood_dark_trim", "family": "timber", "constructionRoles": ["post", "beam", "frame", "truss"], "appearanceTerms": ["dark timber", "oak beam", "weathered wood"]},
+      "timber_warm": {"blenderMaterial": "MAT-wood_warm", "family": "timber", "constructionRoles": ["door", "cladding", "hull"], "appearanceTerms": ["warm wood", "timber", "wooden"]},
+      "timber_sunlit": {"blenderMaterial": "MAT-wood_sunlit", "family": "timber", "constructionRoles": ["deck", "platform", "trim"], "appearanceTerms": ["sunlit timber", "light wood"]},
+      "foliage_palm": {"blenderMaterial": "MAT-foliage_palm", "family": "foliage", "constructionRoles": ["frond", "broadleaf crown"], "appearanceTerms": ["green", "tropical", "lush"]},
+      "foliage_sunlit": {"blenderMaterial": "MAT-foliage_sunlit", "family": "foliage", "constructionRoles": ["highlight crown"], "appearanceTerms": ["bright green", "sunlit leaves"]},
+      "foliage_shadow": {"blenderMaterial": "MAT-foliage_shadow", "family": "foliage", "constructionRoles": ["shadow crown"], "appearanceTerms": ["deep green", "shadow foliage"]},
+      "foliage_pine": {"blenderMaterial": "MAT-foliage_pine", "family": "foliage", "constructionRoles": ["conifer bough"], "appearanceTerms": ["pine", "conifer", "evergreen"]},
+      "bamboo_culm_green": {"blenderMaterial": "MAT-bamboo_culm_green", "family": "bamboo", "constructionRoles": ["culm", "internode", "node collar", "young shoot"], "appearanceTerms": ["green bamboo", "segmented culm", "bamboo cane", "jointed stem"]},
+      "bamboo_leaf_green": {"blenderMaterial": "MAT-bamboo_leaf_green", "family": "foliage", "constructionRoles": ["lanceolate leaf", "upper leaf spray"], "appearanceTerms": ["bamboo leaf", "narrow leaf", "leaf spray", "deep green"]},
+      "cherry_bark_mahogany": {"blenderMaterial": "MAT-bark_cherry_mahogany", "family": "bark", "constructionRoles": ["trunk", "scaffold branch", "flowering twig"], "appearanceTerms": ["cherry bark", "mahogany bark", "reddish brown branch"]},
+      "cherry_blossom_pale": {"blenderMaterial": "MAT-blossom_cherry_pale", "family": "blossom", "constructionRoles": ["outer blossom cloud", "five-petal rosette"], "appearanceTerms": ["pale cherry blossom", "sakura flower", "puffy pink white"]},
+      "cherry_blossom_pink": {"blenderMaterial": "MAT-blossom_cherry_pink", "family": "blossom", "constructionRoles": ["shadow blossom cloud", "flower cluster accent"], "appearanceTerms": ["pink cherry blossom", "sakura", "flower cluster"]},
+      "granite": {"blenderMaterial": "MAT-stone_granite", "family": "stone", "constructionRoles": ["rock mass", "rubble footing", "plinth"], "appearanceTerms": ["granite", "gray stone", "rock"]},
+      "stone_shadow": {"blenderMaterial": "MAT-stone_shadow", "family": "stone", "constructionRoles": ["reveal", "weathered footing", "rock shadow"], "appearanceTerms": ["dark stone", "weathered stone"]},
+      "limestone_trim": {"blenderMaterial": "MAT-stone_limestone_trim", "family": "stone", "constructionRoles": ["sill", "lintel", "quoin", "chimney cap"], "appearanceTerms": ["limestone", "pale stone", "masonry trim"]},
+      "cactus_green": {"blenderMaterial": "MAT-cactus_green", "family": "plant", "constructionRoles": ["cactus body"], "appearanceTerms": ["cactus", "desert green"]},
+      "cactus_rib": {"blenderMaterial": "MAT-cactus_rib", "family": "plant", "constructionRoles": ["cactus rib"], "appearanceTerms": ["dark cactus rib"]},
+      "lime_plaster": {"blenderMaterial": "MAT-plaster_sand", "family": "plaster", "constructionRoles": ["timber frame infill"], "appearanceTerms": ["lime plaster", "sand render", "wattle and daub"]},
+      "white_lime_plaster": {"blenderMaterial": "MAT-plaster_lime_white", "family": "plaster", "constructionRoles": ["recessed infill", "gable panel", "weather coat"], "appearanceTerms": ["white plaster", "lime plaster", "shikkui", "white infill"]},
+      "straw_thatch": {"blenderMaterial": "MAT-thatch_gold", "family": "thatch", "constructionRoles": ["roof coat", "eave bundle"], "appearanceTerms": ["thatch", "straw roof", "reed roof"]},
+      "weathered_thatch_ridge": {"blenderMaterial": "MAT-thatch_weathered_ridge", "family": "thatch", "constructionRoles": ["flush ridge", "weathered bundle"], "appearanceTerms": ["weathered thatch", "dark ridge"]},
+      "fired_brick": {"blenderMaterial": "MAT-brick_fired_red", "family": "brick", "constructionRoles": ["outer leaf", "gable", "wall"], "appearanceTerms": ["red brick", "fired brick", "masonry"]},
+      "weathered_brick": {"blenderMaterial": "MAT-brick_weathered", "family": "brick", "constructionRoles": ["lintel", "jamb", "chimney"], "appearanceTerms": ["weathered brick", "dark brick"]},
+      "lime_mortar": {"blenderMaterial": "MAT-mortar_lime", "family": "mortar", "constructionRoles": ["mortar joint", "pointing"], "appearanceTerms": ["lime mortar", "pale joint"]},
+      "blue_gray_slate": {"blenderMaterial": "MAT-slate_blue_gray", "family": "slate", "constructionRoles": ["natural stone roof field", "overlapping lapped course"], "appearanceTerms": ["natural slate", "natural blue gray slate", "slate roof"]},
+      "cleft_slate_edge": {"blenderMaterial": "MAT-slate_cleft_edge", "family": "slate", "constructionRoles": ["natural cleft eave", "slate ridge", "course edge"], "appearanceTerms": ["natural cleft slate", "dark slate roof edge"]},
+      "charcoal_roof_tile": {"blenderMaterial": "MAT-tile_charcoal", "family": "fired roof tile", "constructionRoles": ["roof field", "hip", "lapped course"], "appearanceTerms": ["dark fired roof tile", "charcoal tile", "kawara"]},
+      "charcoal_tile_edge": {"blenderMaterial": "MAT-tile_charcoal_edge", "family": "fired roof tile", "constructionRoles": ["eave fascia", "ridge cap", "course edge"], "appearanceTerms": ["black ridge tile", "dark eave", "overlapping tile edge"]},
+      "glass_blue": {"blenderMaterial": "MAT-glass_blue", "family": "glass", "constructionRoles": ["recessed glazing"], "appearanceTerms": ["glass", "blue window"]},
+      "concrete_warm": {"blenderMaterial": "MAT-concrete_warm", "family": "concrete", "constructionRoles": ["cast mass"], "appearanceTerms": ["concrete", "warm gray"]},
+      "concrete_dark": {"blenderMaterial": "MAT-concrete_dark_trim", "family": "concrete", "constructionRoles": ["foundation", "trim"], "appearanceTerms": ["dark concrete"]},
+      "gunmetal": {"blenderMaterial": "MAT-metal_gunmetal", "family": "metal", "constructionRoles": ["rail", "frame", "wheel"], "appearanceTerms": ["gunmetal", "steel"]},
+      "track_steel": {"blenderMaterial": "MAT-metal_track", "family": "metal", "constructionRoles": ["track", "rigging", "flashing"], "appearanceTerms": ["dark steel", "track", "flashing"]},
+      "olive_paint": {"blenderMaterial": "MAT-paint_olive", "family": "painted metal", "constructionRoles": ["vehicle hull"], "appearanceTerms": ["olive", "military green"]},
+      "rust_oxide": {"blenderMaterial": "MAT-rust_oxide", "family": "weathered metal", "constructionRoles": ["oxide accent"], "appearanceTerms": ["rust", "oxide"]},
+      "sail_canvas": {"blenderMaterial": "MAT-canvas_sail", "family": "canvas", "constructionRoles": ["sail"], "appearanceTerms": ["canvas", "sailcloth"]},
+      "oxide_hull": {"blenderMaterial": "MAT-hull_oxide_red", "family": "painted timber", "constructionRoles": ["ship hull"], "appearanceTerms": ["oxide red hull", "painted hull"]},
+      "brass": {"blenderMaterial": "MAT-metal_brass", "family": "metal", "constructionRoles": ["fitting", "accent"], "appearanceTerms": ["brass", "gold metal"]},
+      "vermilion_lacquer": {"blenderMaterial": "MAT-paint_vermilion", "family": "painted timber", "constructionRoles": ["torii post", "nuki beam", "temple bracket"], "appearanceTerms": ["vermilion", "shrine red", "lacquered timber"]},
+      "vermilion_shadow": {"blenderMaterial": "MAT-paint_vermilion_shadow", "family": "painted timber", "constructionRoles": ["kasagi underside", "bracket shadow", "door recess"], "appearanceTerms": ["dark vermilion", "aged lacquer", "shadow red"]},
+      "dragon_scale_umber": {"blenderMaterial": "MAT-dragon_scale_umber", "family": "creature hide", "constructionRoles": ["dragon torso", "neck", "limb", "wing bone"], "appearanceTerms": ["umber dragon scale", "massive dragon", "wyvern"]},
+      "dragon_belly_ochre": {"blenderMaterial": "MAT-dragon_belly_ochre", "family": "creature hide", "constructionRoles": ["belly", "muzzle", "tail underside"], "appearanceTerms": ["ochre dragon belly", "serpentine underside"]},
+      "dragon_wing_membrane": {"blenderMaterial": "MAT-dragon_wing_membrane", "family": "creature membrane", "constructionRoles": ["wing membrane"], "appearanceTerms": ["broad dragon wing", "red leathery membrane"]},
+      "crystal_cyan": {"blenderMaterial": "MAT-crystal_cyan", "family": "gemstone", "constructionRoles": ["faceted crystal shaft", "exposed deposit"], "appearanceTerms": ["cyan gemstone", "crystal deposit", "faceted crystal"]},
+      "crystal_violet": {"blenderMaterial": "MAT-crystal_violet", "family": "gemstone", "constructionRoles": ["faceted crystal shaft", "shadow gemstone"], "appearanceTerms": ["violet gemstone", "amethyst", "crystal cluster"]},
+      "crystal_pale_core": {"blenderMaterial": "MAT-crystal_pale_core", "family": "gemstone", "constructionRoles": ["crystal highlight core"], "appearanceTerms": ["pale crystal core", "gemstone highlight"]},
+      "tech_signal_red": {"blenderMaterial": "MAT-tech_signal_red", "family": "painted metal", "constructionRoles": ["facility spine", "antenna brace", "machine housing"], "appearanceTerms": ["signal red", "futuristic facility", "high tech equipment"]},
+      "tech_ceramic_white": {"blenderMaterial": "MAT-tech_ceramic_white", "family": "coated metal", "constructionRoles": ["radar reflector", "equipment cabinet", "facility shell"], "appearanceTerms": ["white radar dish", "ceramic armor", "high tech panel"]},
+      "tech_cyan_accent": {"blenderMaterial": "MAT-tech_cyan_accent", "family": "coated metal", "constructionRoles": ["feed horn", "status panel", "signal accent"], "appearanceTerms": ["cyan technology accent", "communications light"]},
+      "canvas_red": {"blenderMaterial": "MAT-canvas_red", "family": "canvas", "constructionRoles": ["tent flap", "market awning"], "appearanceTerms": ["red canvas", "striped awning", "camp tent"]},
+      "earth_turf": {"blenderMaterial": "MAT-earth_turf", "family": "earth and turf", "constructionRoles": ["earth sheltered mound", "living roof"], "appearanceTerms": ["grassy hillside", "turf roof", "earth sheltered"]},
+      "earth_shadow": {"blenderMaterial": "MAT-earth_shadow", "family": "earth and turf", "constructionRoles": ["cut earth face", "sheltered soil"], "appearanceTerms": ["dark earth", "hillside recess"]},
+      "obsidian": {"blenderMaterial": "MAT-obsidian", "family": "volcanic stone", "constructionRoles": ["ritual monolith", "dark opening", "volcanic fortification"], "appearanceTerms": ["obsidian", "demonic structure", "volcanic black stone"]},
+      "lava_orange": {"blenderMaterial": "MAT-lava_orange", "family": "volcanic material", "constructionRoles": ["lava channel", "flame tongue", "ritual eye"], "appearanceTerms": ["glowing lava", "orange flame", "volcanic prop"]}
+    },
+    "constructionVocabulary": {
+      "wallAssemblies": {
+        "timber_frame_lime_infill_stone_plinth": {
+          "loadPath": ["roof truss", "top plate", "posts and studs", "sill plate", "stone plinth", "rubble footing"],
+          "cornerJoin": "overlapped full-height corner posts tied by sill and top plates",
+          "infill": "recessed lime-plaster panels between structural timbers",
+          "authoredWallThicknessMeters": 0.19,
+          "weatheringLogic": "darken exposed timber and plinth; keep infill calmer and slightly recessed"
+        },
+        "brick_cavity_wall_limestone_trim": {
+          "loadPath": ["slate roof", "gable and outer masonry leaf", "lintels and jambs", "stone plinth", "footing"],
+          "cornerJoin": "alternating long-and-short limestone quoins visually bond perpendicular leaves",
+          "referenceLeafThicknessMeters": 0.1,
+          "referenceCavityMeters": 0.05,
+          "bond": "stylized stretcher courses with pale lime joints",
+          "drainage": "recessed openings imply cavity trays, stopped ends, weepholes, and turned-up sill DPCs",
+          "weatheringLogic": "darken chimney and protected reveals; lighten exposed sills, quoins, and mortar"
+        },
+        "braced_timber_tower": {
+          "loadPath": ["roof trusses", "framed cabin", "platform", "cross-braced legs", "stone pad footings"],
+          "cornerJoin": "overlapping cabin posts, sill, and top plate above paired X-braces",
+          "authoredMemberRangeMeters": [0.085, 0.21],
+          "weatheringLogic": "dark structural edges and sheltered joints; lighter walking surfaces"
+        },
+        "japanese_post_beam_white_lime_infill": {
+          "loadPath": ["dark tile roof", "rafters and purlins", "top plates", "exposed posts and tie beams", "sill plate", "stone plinth"],
+          "cornerJoin": "full-height corner posts visibly receive sill, floor, and top plates with overlapping beam ends",
+          "infill": "white slaked-lime plaster panels sit behind the expressed timber frame and stop at clear openings",
+          "authoredWallThicknessMeters": 0.22,
+          "weatheringLogic": "timber and lower plinth darken while lime infill stays pale and recessed"
+        }
+      },
+      "openingAssemblies": {
+        "timber_recessed_header_jamb_sill": {
+          "parts": ["clear opening", "reveal", "side jambs", "load-bearing header", "projecting sill", "mullion", "transom"],
+          "supportLogic": "header bears into adjacent posts or studs; sill sheds water beyond recessed glazing",
+          "authoredRecessMeters": 0.07
+        },
+        "masonry_recessed_lintel_sill_dpc": {
+          "parts": ["clear opening", "dark reveal", "masonry jambs", "lintel", "projecting stone sill", "mullion", "transom"],
+          "supportLogic": "lintel transfers masonry above to jambs; sill and concealed turned-up DPC direct water outward",
+          "authoredRecessMeters": 0.09
+        },
+        "tower_framed_glazing": {
+          "parts": ["timber reveal", "jambs", "header", "sill", "divided glazing"],
+          "supportLogic": "small openings remain within the cabin post-and-plate frame",
+          "authoredRecessMeters": 0.07
+        },
+        "japanese_recessed_timber_lattice": {
+          "parts": ["clear wall opening", "timber reveal liners", "deep jambs", "load-bearing lintel", "projecting sill", "recessed glazing", "timber lattice"],
+          "supportLogic": "lintel bears into expressed posts; opening is omitted from infill geometry and reveal liners bridge to recessed glazing",
+          "authoredRecessMeters": 0.16
+        }
+      },
+      "doorAssemblies": {
+        "ledged_braced_timber_door": {
+          "parts": ["recess", "frame jambs", "header", "vertical boards", "three ledges", "diagonal brace"],
+          "joinLogic": "brace rises from hanging-side lower rail toward closing-side upper rail",
+          "referenceOpeningMeters": [0.92, 1.78]
+        },
+        "framed_panel_timber_door": {
+          "parts": ["recess", "deep frame", "lintel", "boarded leaf", "ledges", "brace", "weather canopy"],
+          "joinLogic": "frame is independent of the leaf and lintel bears beyond the opening",
+          "referenceOpeningMeters": [1.02, 1.86]
+        },
+        "japanese_recessed_board_panel_door": {
+          "parts": ["clear wall opening", "deep jambs", "bearing lintel", "recessed board leaf", "stiles", "rails", "lower panels", "threshold"],
+          "joinLogic": "the leaf sits behind the exposed structural frame; the lintel overlaps both jamb posts and a projecting threshold sheds water",
+          "referenceOpeningMeters": [1.12, 2.02]
+        }
+      },
+      "roofAssemblies": {
+        "thatch_gable_rafter_coatwork": {
+          "structure": ["paired rafters", "tie beam", "ridge line", "thick straw coat", "overlapped bundles", "flush ridge"],
+          "pitchRangeDegrees": [45, 55],
+          "authoredPitchDegrees": 48,
+          "eaves": "deep un-guttered dripline throws water clear of lime infill and plinth",
+          "ridge": "flush ridge uses darker replaceable coatwork",
+          "weatheringLogic": "ridge, gables, eaves, and junctions receive the strongest value variation"
+        },
+        "slate_gable_lapped": {
+          "structure": ["rafters", "roof deck", "doubled eave zone", "lapped slate courses", "ridge", "gable ends", "chimney flashing"],
+          "pitchRangeDegrees": [34, 42],
+          "authoredPitchDegrees": 38,
+          "courseLogic": "courses run eave-to-ridge with dark cleft edges and staggered visual rhythm",
+          "eaves": "projecting edge with doubled visual course",
+          "chimney": "stack rises through roof with a metal flashing curb and oversailing cap"
+        },
+        "slate_tower_gable_truss": {
+          "structure": ["visible end trusses", "roof planes", "lapped slate courses", "ridge"],
+          "pitchRangeDegrees": [32, 40],
+          "authoredPitchDegrees": 36,
+          "eaves": "overhang protects exposed timber cabin joints"
+        },
+        "dark_tile_gable_deep_eave": {
+          "structure": ["visible gable trusses", "rafters", "roof deck", "overlapping charcoal tile courses", "projecting eaves", "ridge caps", "framed gable infill"],
+          "pitchRangeDegrees": [32, 42],
+          "authoredPitchDegrees": 37,
+          "courseLogic": "tile bands overlap from eave to ridge with a darker doubled starter course",
+          "eaves": "deep projection protects exposed posts, lime infill, recessed doors, and window reveals"
+        },
+        "pagoda_tiered_tile_eaves": {
+          "structure": ["stacked post-and-beam tiers", "bracket complexes", "deep diminishing hip roofs", "overlapping charcoal tile courses", "upturned corner tips", "central finial"],
+          "tierLogic": "three visible tiers diminish upward; the upper tiers are exterior bracket-and-eave stages rather than full occupied floors",
+          "eaves": "wide roof plates and bracket shadows provide the defining horizontal silhouette",
+          "finial": "a tall central metal shaft with stacked rings terminates the vertical axis"
+        },
+        "pagoda_tiered_natural_slate_eaves": {
+          "structure": ["stacked post-and-beam tiers", "bracket complexes", "deep diminishing hip roofs", "overlapping natural slate courses", "cleft slate eaves and ridges", "upturned corner tips", "central finial"],
+          "tierLogic": "three visible tiers diminish upward; each tier has its own structural roof shell and natural-slate weathering layer",
+          "courseLogic": "blue-gray natural slate field pieces overlap toward the ridge and terminate in darker cleft eave, ridge, and corner members",
+          "eaves": "wide slate roof plates and bracket shadows provide the defining horizontal silhouette",
+          "finial": "a tall central metal shaft with stacked rings terminates the vertical axis"
+        }
+      },
+      "weatheringProfiles": {
+        "organic_sheltered": {"highWearZones": ["ridge", "eaves", "lower posts", "plinth"], "treatment": "bounded value contrast, no random texture"},
+        "masonry_temperate": {"highWearZones": ["chimney", "sills", "quoins", "lower wall", "recesses"], "treatment": "material layering and darker protected joints"},
+        "exposed_timber": {"highWearZones": ["footings", "cross-brace joints", "platform edge", "roof edge"], "treatment": "darkened structure with light horizontal wear surfaces"},
+        "vehicle_field": {"highWearZones": ["tracks", "leading edges", "exhaust", "fittings"], "treatment": "paint-metal-rust separation"},
+        "japanese_exposed_timber": {"highWearZones": ["tile edges", "ridge caps", "lower posts", "thresholds", "bracket shadows"], "treatment": "bounded dark timber and tile edges against calm pale infill; no random texture"},
+        "timber_bridge_exposed": {"highWearZones": ["deck board crowns", "beam ends", "rail tops", "post feet", "stone bearing seats"], "treatment": "lighter worn walking courses over dark protected stringers and rails, with darker stone at sheltered joints; no random texture"}
+      },
+      "gateAssemblies": {
+        "myojin_torii_post_nuki_kasagi": {
+          "parts": ["paired inward-leaning round posts", "through nuki beam", "upper shimaki beam", "projecting curved kasagi cap", "wedge blocks", "stone footings"],
+          "joinLogic": "the nuki visibly passes through both posts; the broader kasagi projects past them and turns upward at both ends",
+          "authoredClearWidthMeters": 3.7
+        }
+      },
+      "botanicalAssemblies": {
+        "bamboo_clumping_culm_node_leaf_spray": {
+          "growthLogic": ["rhizome-origin clump", "multiple cylindrical woody culms", "solid raised nodes between hollow internodes", "lateral branches emerging from upper nodes", "narrow lanceolate leaves in sprays"],
+          "silhouetteLogic": "separate leaning culms remain visible through bounded leaf sprays; repeated node collars provide the defining segmented rhythm",
+          "authoredCulmCount": 6,
+          "authoredNodeCollarsPerMatureCulm": 5
+        },
+        "cherry_bifurcated_branch_blossom_cloud": {
+          "growthLogic": ["single trunk", "low bifurcation into scaffold limbs", "broad spreading secondary branches", "smaller flowering twigs", "clustered blossom masses along and beyond branch tips"],
+          "silhouetteLogic": "exposed reddish branches divide a wide rounded crown into asymmetric pale and pink blossom clouds rather than a continuous green sphere",
+          "authoredBlossomPresentation": "faceted cloud masses plus perimeter five-petal rosettes"
+        }
+      },
+      "bridgeAssemblies": {
+        "japanese_timber_stringer_deck_rail_stone_support": {
+          "loadPath": ["transverse deck courses", "four longitudinal timber stringers", "cross beams and lateral blocking", "stone pier caps and end abutments", "ground"],
+          "deckLogic": "closely spaced transverse walking planks cross and visibly bear on multiple longitudinal stringers; narrow gaps separate replaceable courses",
+          "lateralLogic": "paired side rails use posts, continuous lower rails, gently crowned top rails, and alternating diagonal braces to keep the long silhouette aligned",
+          "supportLogic": "battered stone end abutments seat the beam ends while two intermediate stone piers shorten the visible beam spans",
+          "joineryLogic": "rails and braces overlap posts at visible bearing zones; capped end posts and expressed beam ends provide a restrained Japanese garden-bridge character",
+          "authoredSpanMeters": 16,
+          "authoredDeckWidthMeters": 3.4,
+          "authoredStructuralHeightMeters": 2.4
+        }
+      },
+      "creatureAssemblies": {
+        "dragon_coiled_wyvern_winged": {
+          "anatomyLogic": ["long segmented tail and torso", "raised neck and horned head", "paired load-bearing legs", "two bone-supported membrane wings", "dorsal spine rhythm"],
+          "silhouetteLogic": "head, muzzle, horns, four grounded limbs, serpentine tail, and a broad paired wing span remain separable at oblique map distance",
+          "authoredWingSpanMeters": 8.3,
+          "authoredBodyLengthMeters": 11.4
+        }
+      },
+      "industrialAssemblies": {
+        "mine_headframe_sheave_hoist_rail": {
+          "loadPath": ["paired sheave wheels", "crowned lattice headframe", "battered steel legs", "shaft collar", "concrete foundation"],
+          "processLogic": ["hoist shed and winding drum", "shaft opening", "rail approach", "ore skip cart"],
+          "silhouetteLogic": "tall four-leg headframe and paired wheels visibly identify a mine above the surrounding pit"
+        },
+        "tracked_excavator_hydraulic_boom_bucket": {
+          "loadPath": ["tracked undercarriage", "slew ring", "counterweighted house", "articulated boom", "stick", "toothed bucket"],
+          "processLogic": ["boom lift cylinder", "stick cylinder", "cab and operator glazing", "digging bucket"],
+          "silhouetteLogic": "offset cab, long articulated boom, and toothed bucket remain visible independently of the tracks"
+        },
+        "fortified_bunker_battered_shell_gun_ring": {
+          "loadPath": ["roof slab", "battered concrete shell", "thick firing-slot lintels", "foundation slab"],
+          "defensiveLogic": ["recessed entry", "multiple firing slots", "broken parapet", "roof gun ring and shield"]
+        }
+      },
+      "communicationsAssemblies": {
+        "lattice_mast_parabolic_dish_feed": {
+          "loadPath": ["parabolic reflector", "feed arm", "tapered lattice mast", "four anchored legs", "concrete foundation"],
+          "signalLogic": "reflector faces a discrete feed horn while the lattice mast keeps a long-distance communications silhouette"
+        },
+        "ground_station_pedestal_yoke_reflector": {
+          "loadPath": ["large parabolic reflector", "feed truss", "elevation yoke", "azimuth pedestal", "circular foundation"],
+          "systems": ["service cabinets", "tracking mount", "feed horn", "radar reflector"]
+        },
+        "futuristic_facility_modular_command_shell": {
+          "loadPath": ["angular coated shell", "central service spine", "modular side equipment bays", "foundation slab"],
+          "systems": ["recessed powered doors", "protected glazing", "roof vents", "parabolic roof dish", "external conduits"]
+        }
+      },
+      "earthworkAssemblies": {
+        "hobbit_turf_mound_round_opening_facade": {
+          "loadPath": ["turf and earth mound", "cut stone front wall", "segmental stone rings", "stone plinth", "ground"],
+          "openingLogic": "round door and windows sit behind true facade gaps with deep ring surrounds, radial door boards, mullions, and transoms",
+          "weatherLogic": "earth and turf cover the roof mass while the chimney and masonry facade remain proud of the mound"
+        },
+        "gemstone_matrix_faceted_cluster": {
+          "growthLogic": ["grounded host-rock matrix", "multiple prismatic shafts", "separate pointed terminations", "contrasting internal highlight cores"],
+          "silhouetteLogic": "unequal cyan and violet crystals lean outward from one exposed deposit while the tallest shaft anchors the cluster"
+        }
+      },
+      "propAssemblies": {
+        "windmill_masonry_tower_four_sail": {"loadPath": ["four cloth sail panels", "radial timber spars", "front axle hub", "masonry tower", "ground"], "systems": ["lattice sail rungs", "weather cap", "recessed door and windows"]},
+        "timber_pile_dock_stringer_deck": {"loadPath": ["transverse deck courses", "longitudinal stringers", "braced driven piles", "waterbed"], "systems": ["bollards", "pile caps", "diagonal lateral braces"]},
+        "canvas_ridge_tent_rope_stay": {"loadPath": ["canvas fly", "ridge pole", "paired end poles", "guy ropes", "ground pegs"], "systems": ["separate entry flaps", "dark interior", "bedroll"]},
+        "stone_well_crank_roof": {"loadPath": ["pitched slate shelter", "timber posts", "coursed stone ring", "ground"], "systems": ["crank axle", "rope spool", "bucket", "dark well opening"]},
+        "volcanic_ritual_monolith_horned": {"loadPath": ["horned obsidian monolith", "tiered altar", "ground"], "systems": ["demon mask", "lava channels", "paired braziers"]},
+        "timber_fence_braced_gate": {"loadPath": ["top and lower rails", "posts", "stone pad footings"], "systems": ["diagonal braces", "independent gate leaf", "metal latch"]},
+        "campfire_stone_ring_tripod": {"loadPath": ["tripod", "stone fire ring", "ground"], "systems": ["crossed logs", "layered flame tongues", "hanging kettle"]},
+        "supply_crate_slat_cleat_stack": {"loadPath": ["timber box panels", "edge bands", "diagonal cleats"], "systems": ["stacked scales", "metal corner straps"]},
+        "market_stall_post_beam_awning": {"loadPath": ["striped canvas awning", "top beams", "four posts", "ground"], "systems": ["counter", "back shelf", "produce baskets"]}
+      }
+    },
+    "researchReferences": [
+      {"id": "historic_england_timber_frames", "url": "https://historicengland.org.uk/advice/technical-advice/flooding-and-historic-buildings/building-construction/timber-framed-buildings/", "usedFor": ["timber frame and infill", "plinth and sill junctions"]},
+      {"id": "historic_england_thatch", "url": "https://historicengland.org.uk/advice/technical-advice/buildings/thatching-advice/", "usedFor": ["regional thatch materials", "flush ridge", "repairable coatwork"]},
+      {"id": "historic_england_roofs", "url": "https://historicengland.org.uk/advice/your-home/maintain-repair/roofs/", "usedFor": ["rafter purlin batten hierarchy", "ridge gable chimney wear"]},
+      {"id": "awc_wfcm_2018", "url": "https://awc.org/wp-content/uploads/2021/12/AWC-WFCM2018-Workbook-181128.pdf", "usedFor": ["opening proportions", "header and stud load paths", "pitched roof proportions"]},
+      {"id": "bda_resisting_rain", "url": "https://www.brick.org.uk/uploads/downloads/11.-Resisting-rainwater-penetration-Technical-Guide-2023.f1678701309.pdf", "usedFor": ["cavity tray", "weephole", "jamb closer", "turned sill DPC"]},
+      {"id": "bda_aesthetic_brickwork", "url": "https://www.brick.org.uk/uploads/downloads/25.-Aesthetic-Brickwork.f1700252558.pdf", "usedFor": ["brick aspect ratio", "bounded projections"]},
+      {"id": "srca_slate_installation", "url": "https://www.slateroofers.org/downloads/SRCA_Installation_Guidelines.pdf", "usedFor": ["slate headlap", "eave and rake projection", "starter course", "chimney flashing"]},
+      {"id": "historic_england_masonry", "url": "https://historicengland.org.uk/advice/your-home/maintain-repair/walls/", "usedFor": ["solid brick and stone", "rubble core and ashlar facing"]},
+      {"id": "mlit_traditional_japanese_homes", "url": "https://www.mlit.go.jp/common/001260985.pdf", "usedFor": ["slaked-lime plaster", "tiled roofs", "deep eaves", "traditional exterior vocabulary"]},
+      {"id": "mlit_kumamoto_traditional_house", "url": "https://www.mlit.go.jp/jutakukentiku/house/kikoujirei_0041.html", "usedFor": ["expressed post-and-beam frame", "nuki ties", "earthen infill", "wooden fittings", "deep eaves", "tile roof"]},
+      {"id": "mlit_ninnaji_five_story_pagoda", "url": "https://www.mlit.go.jp/tagengo-db/en/R1-00345.html", "usedFor": ["bracket-and-eave upper tiers", "central pillar", "pagoda tier logic"]},
+      {"id": "mlit_horyuji_five_story_pagoda", "url": "https://www.mlit.go.jp/tagengo-db/en/R1-00170.html", "usedFor": ["central pillar", "independent diminishing tiers", "flexible timber joints"]},
+      {"id": "jinja_honcho_torii", "url": "https://www.jinjahoncho.or.jp/omairi/torii/", "usedFor": ["Myojin upward-curved top beam", "vermilion shrine gate vocabulary"]},
+      {"id": "cultural_heritage_torii_components", "url": "https://bunka.nii.ac.jp/heritages/detail/526707", "usedFor": ["torii posts", "kasagi top beam", "nuki through beam"]},
+      {"id": "usfs_common_bamboo_morphology", "url": "https://research.fs.usda.gov/feis/fire-studies/caribbean-fire-invasives-learning-network-2011", "usedFor": ["dense clumping habit", "cylindrical jointed woody culms", "leafy branches at nodes", "narrow leaves"]},
+      {"id": "missouri_botanical_fargesia_rufa", "url": "https://www.missouribotanicalgarden.org/PlantFinder/PlantFinderDetails.aspx?taxonid=285374", "usedFor": ["clumping bamboo form", "bright green culms", "rich evergreen foliage", "graceful leafy stems"]},
+      {"id": "nps_cherry_tree_parts", "url": "https://www.nps.gov/subjects/cherryblossom/how-do-cherry-trees-work.htm", "usedFor": ["visible trunk and branch hierarchy", "flowers concentrated on branches"]},
+      {"id": "usda_flowering_cherry_architecture", "url": "https://usna.usda.gov/assets/images/as_pdf_image/2025_Beyond_the_Tidal_Basin_web_booklet.pdf", "usedFor": ["broad and umbrella-shaped cherry crowns", "flower clusters along branches", "upright spreading variants"]},
+      {"id": "japan_gov_traditional_wooden_beam_bridges", "url": "https://www.gov-online.go.jp/eng/publicity/book/hlj/html/202309/202309_00_en.html", "usedFor": ["traditional Japanese wooden beam bridge vocabulary", "wooden poles and beams", "stylized bridge silhouettes"]},
+      {"id": "usda_short_span_timber_bridge_details", "url": "https://www.fs.usda.gov/t-d/pubs/pdfpubs/pdf12232316/pdf12232316Pdpi300.pdf", "usedFor": ["redundant longitudinal stringers", "blocking between stringers", "sill and backwall support logic", "transverse deck protection"]},
+      {"id": "fhwa_covered_bridge_floor_and_bracing", "url": "https://www.fhwa.dot.gov/publications/research/infrastructure/structures/04098/12.cfm", "usedFor": ["longitudinal stringers", "transverse floor and deck load paths", "lateral bracing", "abutment transfer"]},
+      {"id": "japan_gov_kintaikyo_joinery_and_piers", "url": "https://www.gov-online.go.jp/eng/publicity/book/hlj/html/202309/202309_04_en.html", "usedFor": ["Japanese kigumi timber joinery expression", "stonework pier support", "layered wood member silhouette"]},
+      {"id": "worldclaw_paper_2608_05248", "url": "https://arxiv.org/abs/2608.05248", "usedFor": ["paper prompt-suite family audit", "pages 13 through 16 and 32 through 38", "dragon windmill mine gemstone futuristic and Hobbit reference silhouettes"]},
+      {"id": "nps_windmills_american_plains", "url": "https://www.nps.gov/articles/windmills.htm", "usedFor": ["windmill tower and sail mechanism vocabulary", "large manually furled European cloth sails"]},
+      {"id": "nps_sagamore_windmill_hsr", "url": "https://www.nps.gov/parkhistory/online_books/sahi/farm_buildings_hsr.pdf", "usedFor": ["windmill tower", "pump house relationship", "historic structural proportions"]},
+      {"id": "nasa_ground_station_components", "url": "https://www.nasa.gov/smallsat-institute/sst-soa/ground-data-systems-and-mission-operations/", "usedFor": ["parabolic reflector", "feed antenna", "ground station equipment"]},
+      {"id": "nasa_berkeley_ground_station", "url": "https://hesperia.gsfc.nasa.gov/rhessi3/ssl_site/ground_systems/station.html", "usedFor": ["pedestal mounted parabolic dish", "tracking mount", "associated electronics"]}
+    ]
+  },
+  "evidence": {
+    "version": 1,
+    "baseUri": "/worldclaw/assets/dossiers/",
+    "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png",
+    "turnaroundViews": ["front", "front_three_quarter", "side", "rear"],
+    "renderSource": "exported_glb_roundtrip",
+    "projection": "orthographic",
+    "background": "neutral_studio"
+  },
+  "prototypes": {
+    "palm": {
+      "node": "ASSET_palm",
+      "generator": "palm",
+      "targetHeightMeters": 8,
+      "collider": {
+        "type": "capsule",
+        "centerMeters": [0, 3.25, 0],
+        "radiusMeters": 0.42,
+        "heightMeters": 6.5
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "palm_tropical_crown",
+      "variants": [{
+        "id": "palm_tropical_crown", "node": "ASSET_palm", "status": "authored",
+        "appearanceTerms": ["palm", "tropical", "coconut", "lush", "green"],
+        "materialIds": ["timber_sunlit", "timber_warm", "timber_structural_dark", "foliage_palm", "foliage_sunlit"],
+        "constructionRecipe": {"systems": ["segmented tapered trunk", "radial drooping fronds", "coconut crown", "upright crown spear"]}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/palm-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "tree": {
+      "node": "ASSET_tree",
+      "generator": "tree",
+      "targetHeightMeters": 7,
+      "collider": {
+        "type": "capsule",
+        "centerMeters": [0, 2.2, 0],
+        "radiusMeters": 0.58,
+        "heightMeters": 4.4
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "tree_broadleaf_layered",
+      "variants": [{
+        "id": "tree_broadleaf_layered", "node": "ASSET_tree", "status": "authored",
+        "appearanceTerms": ["tree", "broadleaf", "deciduous", "layered canopy", "green"],
+        "materialIds": ["timber_warm", "timber_sunlit", "foliage_palm", "foliage_sunlit", "foliage_shadow"],
+        "constructionRecipe": {"systems": ["tapered trunk", "forked branch hierarchy", "overlapping faceted crowns"]}
+      }, {
+        "id": "tree_bamboo_cluster", "node": "ASSET_tree_bamboo_cluster", "status": "authored",
+        "targetHeightMeters": 7.5,
+        "collider": {"type": "capsule", "centerMeters": [0, 3.25, 0], "radiusMeters": 1.05, "heightMeters": 6.5},
+        "appearanceTerms": ["bamboo", "bamboo cluster", "terraced bamboo forest", "segmented culms", "raised node collars", "lanceolate leaf sprays", "dense grove"],
+        "materialIds": ["bamboo_culm_green", "bamboo_leaf_green"],
+        "constructionRecipe": {
+          "botanicalAssembly": "bamboo_clumping_culm_node_leaf_spray",
+          "weatheringProfile": "organic_sheltered",
+          "systems": ["six individually leaning mature culms", "five raised node collars per culm", "upper-node lateral branches", "directional lanceolate leaf sprays", "paired young shoots"],
+          "authoredDimensions": {"culmCount": 6, "targetHeightMeters": 7.5, "clusterFootprintMeters": [4.3, 4.2], "matureCulmDiameterRangeMeters": [0.14, 0.32]}
+        },
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/bamboo-cluster-turnaround.png"}
+      }, {
+        "id": "tree_cherry_blossom", "node": "ASSET_tree_cherry_blossom", "status": "authored",
+        "targetHeightMeters": 7,
+        "collider": {"type": "capsule", "centerMeters": [0, 2.05, 0], "radiusMeters": 0.58, "heightMeters": 4.1},
+        "appearanceTerms": ["cherry blossom", "sakura", "Japanese flowering cherry", "broad spreading crown", "visible branching", "pale pink blossom clouds", "flower clusters"],
+        "materialIds": ["cherry_bark_mahogany", "cherry_blossom_pale", "cherry_blossom_pink", "timber_structural_dark"],
+        "constructionRecipe": {
+          "botanicalAssembly": "cherry_bifurcated_branch_blossom_cloud",
+          "weatheringProfile": "organic_sheltered",
+          "systems": ["mahogany trunk with low bifurcation", "broad asymmetric scaffold branches", "visible flowering twigs", "layered pale and pink blossom masses", "perimeter five-petal rosettes"],
+          "authoredDimensions": {"targetHeightMeters": 7, "crownSpanMeters": 6.1, "scaffoldSegmentCount": 9, "blossomMassCount": 16}
+        },
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/cherry-blossom-turnaround.png"}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/tree-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "pine": {
+      "node": "ASSET_pine",
+      "generator": "pine",
+      "targetHeightMeters": 9,
+      "collider": {
+        "type": "capsule",
+        "centerMeters": [0, 3.35, 0],
+        "radiusMeters": 0.52,
+        "heightMeters": 6.7
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "pine_conifer_tiered",
+      "variants": [{
+        "id": "pine_conifer_tiered", "node": "ASSET_pine", "status": "authored",
+        "appearanceTerms": ["pine", "conifer", "evergreen", "tiered", "forest"],
+        "materialIds": ["timber_structural_dark", "foliage_pine", "foliage_shadow"],
+        "constructionRecipe": {"systems": ["single tapered trunk", "overlapping conical bough tiers", "narrow leader"]}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/pine-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "rock": {
+      "node": "ASSET_rock",
+      "generator": "rock",
+      "targetHeightMeters": 1.6,
+      "collider": {
+        "type": "sphere",
+        "centerMeters": [0, 0.78, 0],
+        "radiusMeters": 1.05
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "rock_weathered_granite",
+      "variants": [{
+        "id": "rock_weathered_granite", "node": "ASSET_rock", "status": "authored",
+        "appearanceTerms": ["rock", "boulder", "granite", "weathered", "faceted"],
+        "materialIds": ["granite", "stone_shadow"],
+        "constructionRecipe": {"systems": ["deterministically perturbed rock mass", "overlapping grounded shards"]}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/rock-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "cactus": {
+      "node": "ASSET_cactus",
+      "generator": "cactus",
+      "targetHeightMeters": 3.6,
+      "collider": {
+        "type": "capsule",
+        "centerMeters": [0, 1.8, 0],
+        "radiusMeters": 0.4,
+        "heightMeters": 3.6
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "cactus_saguaro_ribbed",
+      "variants": [{
+        "id": "cactus_saguaro_ribbed", "node": "ASSET_cactus", "status": "authored",
+        "appearanceTerms": ["cactus", "saguaro", "desert", "ribbed", "green"],
+        "materialIds": ["cactus_green", "cactus_rib"],
+        "constructionRecipe": {"systems": ["tapered ribbed stem", "overlapping elbow joints", "raised arms", "rounded crowns"]}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/cactus-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "hut": {
+      "node": "ASSET_hut",
+      "generator": "hut",
+      "targetHeightMeters": 4.5,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 2.25, 0],
+        "sizeMeters": [4.5, 4.5, 3.8]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "hut_timber_frame_thatch",
+      "variants": [{
+        "id": "hut_timber_frame_thatch", "node": "ASSET_hut", "status": "authored",
+        "appearanceTerms": ["hut", "cottage", "thatched roof", "timber beams", "lime plaster", "stone plinth", "rustic"],
+        "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "lime_plaster", "straw_thatch", "weathered_thatch_ridge", "granite", "stone_shadow", "limestone_trim", "glass_blue"],
+        "constructionRecipe": {
+          "wallAssembly": "timber_frame_lime_infill_stone_plinth",
+          "openingAssemblies": ["timber_recessed_header_jamb_sill"],
+          "doorAssembly": "ledged_braced_timber_door",
+          "roofAssembly": "thatch_gable_rafter_coatwork",
+          "weatheringProfile": "organic_sheltered",
+          "authoredDimensions": {"wallThicknessMeters": 0.19, "roofPitchDegrees": 48, "doorOpeningMeters": [0.92, 1.78]}
+        }
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/hut-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "building": {
+      "node": "ASSET_building",
+      "generator": "building",
+      "targetHeightMeters": 8,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 4, 0],
+        "sizeMeters": [5.4, 8, 4.4]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "building_timber_frame_white_tile",
+      "variants": [{
+        "id": "building_brick_slate", "node": "ASSET_building", "status": "authored",
+        "appearanceTerms": ["building", "house", "red brick", "slate roof", "limestone trim", "chimney", "traditional masonry"],
+        "materialIds": ["fired_brick", "weathered_brick", "lime_mortar", "limestone_trim", "blue_gray_slate", "cleft_slate_edge", "glass_blue", "timber_warm", "timber_structural_dark", "track_steel"],
+        "constructionRecipe": {
+          "wallAssembly": "brick_cavity_wall_limestone_trim",
+          "openingAssemblies": ["masonry_recessed_lintel_sill_dpc"],
+          "doorAssembly": "framed_panel_timber_door",
+          "roofAssembly": "slate_gable_lapped",
+          "weatheringProfile": "masonry_temperate",
+          "authoredDimensions": {"roofPitchDegrees": 38, "brickAspectRatio": 3.31, "doorOpeningMeters": [1.02, 1.86]}
+        }
+      }, {
+        "id": "building_timber_frame_white_tile", "node": "ASSET_building_timber_frame_white_tile", "status": "authored",
+        "targetHeightMeters": 8,
+        "collider": {"type": "box", "centerMeters": [0, 4, 0], "sizeMeters": [5.8, 8, 4.8]},
+        "appearanceTerms": ["building", "house", "Japanese house", "Japanese coastal town building", "machiya", "exposed dark timber frame", "white lime plaster infill", "recessed wooden doors", "recessed lattice windows", "overlapping dark charcoal roof tiles", "deep eaves"],
+        "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "white_lime_plaster", "charcoal_roof_tile", "charcoal_tile_edge", "granite", "stone_shadow", "glass_blue", "track_steel"],
+        "constructionRecipe": {
+          "wallAssembly": "japanese_post_beam_white_lime_infill",
+          "openingAssemblies": ["japanese_recessed_timber_lattice"],
+          "doorAssembly": "japanese_recessed_board_panel_door",
+          "roofAssembly": "dark_tile_gable_deep_eave",
+          "weatheringProfile": "japanese_exposed_timber",
+          "systems": ["exposed timber post-and-beam frame", "recessed constructed timber door assembly", "recessed constructed lattice window assembly", "white lime plaster infill panels", "overlapping fired charcoal roof tile courses"],
+          "authoredDimensions": {"wallThicknessMeters": 0.22, "openingRecessMeters": 0.16, "roofPitchDegrees": 37, "doorOpeningMeters": [1.12, 2.02], "eaveProjectionMeters": 0.62},
+          "geometryGuarantees": ["front and side infill is split around clear openings", "reveal liners bridge the full wall depth", "door leaves and glazing sit behind the expressed frame", "roof deck, lapped courses, doubled eaves, gable trusses, and ridge caps are separate meshes"]
+        },
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/building-timber-frame-white-tile-turnaround.png"}
+      }, {
+        "id": "building_hobbit_round_door", "node": "ASSET_building_hobbit_round_door", "status": "authored",
+        "targetHeightMeters": 6.2,
+        "collider": {"type": "box", "centerMeters": [0.1, 3.1, -0.18], "sizeMeters": [8.9, 6.2, 8.2]},
+        "appearanceTerms": ["Hobbit home", "round-door hillside home", "earth sheltered house", "grassy turf roof", "circular wooden door", "round windows", "stone arch", "village beneath hills"],
+        "materialIds": ["earth_turf", "earth_shadow", "limestone_trim", "stone_shadow", "timber_structural_dark", "vermilion_lacquer", "glass_blue", "brass"],
+        "constructionRecipe": {
+          "earthworkAssembly": "hobbit_turf_mound_round_opening_facade",
+          "weatheringProfile": "organic_sheltered",
+          "systems": ["earth and turf mound", "cut stone front facade", "true circular door and window openings", "recessed radial-board door leaf", "segmental stone and timber rings", "projecting chimney"],
+          "authoredDimensions": {"targetHeightMeters": 6.2, "moundWidthMeters": 8.8, "roundDoorDiameterMeters": 2.9, "facadeRecessMeters": 0.3},
+          "geometryGuarantees": ["round door leaf is recessed behind a separate sixteen-segment stone ring", "round windows use separate ring surrounds, mullions, transoms, and glazing", "earth mound and facade are independent meshes"]
+        },
+        "provenance": {"paperPages": [38], "researchReferenceIds": ["worldclaw_paper_2608_05248"], "note": "Authored from the retained Figure 15 hillside-village reference; stylized construction is original."},
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/building-hobbit-round-door-turnaround.png"}
+      }, {
+        "id": "building_futuristic_facility", "node": "ASSET_building_futuristic_facility", "status": "authored",
+        "targetHeightMeters": 7.8,
+        "collider": {"type": "box", "centerMeters": [0, 3.9, 0], "sizeMeters": [11, 7.8, 7.5]},
+        "appearanceTerms": ["futuristic facility", "high-tech command building", "communications facility", "industrial base", "Red Alert inspired", "angular modular shell", "radar dish", "signal red equipment"],
+        "materialIds": ["tech_signal_red", "tech_ceramic_white", "tech_cyan_accent", "concrete_warm", "concrete_dark", "gunmetal", "track_steel", "glass_blue"],
+        "constructionRecipe": {
+          "communicationsAssembly": "futuristic_facility_modular_command_shell",
+          "weatheringProfile": "vehicle_field",
+          "systems": ["angular coated command shell", "central red service spine", "powered recessed doors", "protected glazing", "modular equipment bays", "roof vents and parabolic dish", "external service conduits"],
+          "authoredDimensions": {"targetHeightMeters": 7.8, "facilityWidthMeters": 10.1, "roofDishDiameterMeters": 2.6},
+          "geometryGuarantees": ["entry leaves sit behind a dark structural recess", "windows have separate protective brows", "radar reflector, feed, vents, conduits, and side equipment modules are separate meshes"]
+        },
+        "provenance": {"paperPages": [16], "researchReferenceIds": ["worldclaw_paper_2608_05248", "nasa_ground_station_components"], "note": "Matches the retained futuristic snow-valley functional vocabulary without copying franchise geometry."},
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/building-futuristic-facility-turnaround.png"}
+      }, {
+        "id": "building_fortified_bunker", "node": "ASSET_building_fortified_bunker", "status": "authored",
+        "targetHeightMeters": 4.8,
+        "collider": {"type": "box", "centerMeters": [0, 2.4, 0], "sizeMeters": [8, 4.8, 8]},
+        "appearanceTerms": ["bunker", "defensive structure", "fortified compound", "concrete fortification", "firing slots", "roof gun", "desert battlefield defense"],
+        "materialIds": ["concrete_warm", "concrete_dark", "gunmetal", "track_steel", "tech_signal_red", "obsidian"],
+        "constructionRecipe": {
+          "industrialAssembly": "fortified_bunker_battered_shell_gun_ring",
+          "weatheringProfile": "vehicle_field",
+          "systems": ["battered concrete shell", "thick roof slab", "recessed steel entry", "protected firing slots", "broken parapet", "roof gun ring shield and barrel"],
+          "authoredDimensions": {"targetHeightMeters": 4.8, "footprintMeters": [7.2, 5.2]},
+          "geometryGuarantees": ["firing slots are dark recessed assemblies with separate lintels", "roof weapon has independent ring, shield, and barrel"]
+        },
+        "provenance": {"paperPages": [15, 16, 36], "researchReferenceIds": ["worldclaw_paper_2608_05248"], "note": "Cross-case defensive structure for battlefield, futuristic, and volcanic fortification requirements."},
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/building-fortified-bunker-turnaround.png"}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/building-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "watchtower": {
+      "node": "ASSET_watchtower",
+      "generator": "watchtower",
+      "targetHeightMeters": 10,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 5, 0],
+        "sizeMeters": [3.8, 10, 3.4]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "watchtower_braced_timber_slate",
+      "variants": [{
+        "id": "watchtower_braced_timber_slate", "node": "ASSET_watchtower", "status": "authored",
+        "appearanceTerms": ["watchtower", "tower", "braced timber", "slate roof", "lookout", "ladder"],
+        "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "granite", "blue_gray_slate", "cleft_slate_edge", "glass_blue", "gunmetal"],
+        "constructionRecipe": {
+          "wallAssembly": "braced_timber_tower",
+          "openingAssemblies": ["tower_framed_glazing"],
+          "doorAssembly": "ledged_braced_timber_door",
+          "roofAssembly": "slate_tower_gable_truss",
+          "weatheringProfile": "exposed_timber",
+          "authoredDimensions": {"roofPitchDegrees": 36, "primaryMemberRangeMeters": [0.11, 0.21]}
+        }
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/watchtower-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "ship": {
+      "node": "ASSET_ship",
+      "generator": "ship",
+      "targetHeightMeters": 7,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 1.1, 0],
+        "sizeMeters": [9.4, 2.2, 3.6]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "ship_timber_canvas_cutter",
+      "variants": [{
+        "id": "ship_timber_canvas_cutter", "node": "ASSET_ship", "status": "authored",
+        "appearanceTerms": ["ship", "boat", "sailing", "timber", "canvas sail", "cutter", "oxide hull"],
+        "materialIds": ["oxide_hull", "timber_warm", "timber_sunlit", "timber_structural_dark", "sail_canvas", "glass_blue", "gunmetal", "track_steel", "brass"],
+        "constructionRecipe": {"systems": ["tapered sectional hull", "overlapping deck and cabin", "mast boom and stays", "main and jib sails", "rail and stanchions"]}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/ship-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "tank": {
+      "node": "ASSET_tank",
+      "generator": "tank",
+      "targetHeightMeters": 3.2,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 1.3, 0],
+        "sizeMeters": [5.8, 2.6, 3.2]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "tank_olive_field",
+      "variants": [{
+        "id": "tank_olive_field", "node": "ASSET_tank", "status": "authored",
+        "appearanceTerms": ["tank", "vehicle", "olive", "military", "tracked", "weathered steel"],
+        "materialIds": ["olive_paint", "gunmetal", "track_steel", "rust_oxide", "timber_structural_dark"],
+        "constructionRecipe": {"systems": ["paired track blocks and road wheels", "layered sloped hull", "faceted turret", "barrel and muzzle sleeve", "hatch antenna and stowage"], "weatheringProfile": "vehicle_field"}
+      }, {
+        "id": "tank_tracked_excavator", "node": "ASSET_tank_tracked_excavator", "status": "authored",
+        "targetHeightMeters": 4.5,
+        "collider": {"type": "box", "centerMeters": [2.05, 2.25, 0], "sizeMeters": [8.6, 4.5, 3.2]},
+        "appearanceTerms": ["excavator", "excavation equipment", "construction machinery", "tracked digger", "hydraulic boom", "toothed bucket", "active mining equipment"],
+        "materialIds": ["tech_signal_red", "tech_ceramic_white", "gunmetal", "track_steel", "rust_oxide", "glass_blue"],
+        "constructionRecipe": {
+          "industrialAssembly": "tracked_excavator_hydraulic_boom_bucket",
+          "weatheringProfile": "vehicle_field",
+          "systems": ["paired tracks and road wheels", "slew ring and counterweighted house", "offset glazed cab", "articulated boom and stick", "two exposed hydraulic cylinders", "toothed digging bucket"],
+          "authoredDimensions": {"targetHeightMeters": 4.5, "workingLengthMeters": 7.2},
+          "geometryGuarantees": ["boom, stick, lift cylinder, stick cylinder, and bucket are separate articulated silhouettes", "cab is offset from the machine house", "bucket has three visible teeth"]
+        },
+        "provenance": {"paperPages": [37], "researchReferenceIds": ["worldclaw_paper_2608_05248"], "note": "Honest authored vehicle variant for excavation and construction machinery."},
+        "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/tracked-excavator-turnaround.png"}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/tank-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "pagoda": {
+      "node": "ASSET_pagoda",
+      "generator": "pagoda",
+      "targetHeightMeters": 14,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 7, 0],
+        "sizeMeters": [7.9, 14, 7.9]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "pagoda_three_tier_dark_tile",
+      "variants": [{
+        "id": "pagoda_three_tier_dark_tile", "node": "ASSET_pagoda", "status": "authored",
+        "appearanceTerms": ["pagoda", "Japanese temple", "three tier", "dark timber", "white lime plaster", "natural blue gray slate roof", "overlapping natural slate courses", "deep cleft slate eaves", "bracket complexes", "central finial"],
+        "materialIds": ["timber_structural_dark", "timber_warm", "white_lime_plaster", "blue_gray_slate", "cleft_slate_edge", "vermilion_lacquer", "vermilion_shadow", "granite", "stone_shadow", "brass"],
+        "constructionRecipe": {
+          "wallAssembly": "japanese_post_beam_white_lime_infill",
+          "roofAssembly": "pagoda_tiered_natural_slate_eaves",
+          "weatheringProfile": "japanese_exposed_timber",
+          "systems": ["stone podium", "diminishing post-and-beam stages", "projecting bracket blocks", "three separate deep hip roofs", "overlapping natural slate roof courses", "cleft slate eaves and ridge edges", "upturned corner tips", "tall ringed metal finial"],
+          "authoredDimensions": {"visibleTierCount": 3, "lowestEaveWidthMeters": 7.2, "finialHeightMeters": 4.25}
+        }
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/pagoda-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "torii": {
+      "node": "ASSET_torii",
+      "generator": "torii",
+      "targetHeightMeters": 5.5,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 2.75, 0],
+        "sizeMeters": [6.9, 5.5, 1.1]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "torii_myojin_vermilion",
+      "variants": [{
+        "id": "torii_myojin_vermilion", "node": "ASSET_torii", "status": "authored",
+        "appearanceTerms": ["torii", "Japanese shrine gate", "Myojin", "vermilion", "curved kasagi", "through nuki beam", "stone footings"],
+        "materialIds": ["vermilion_lacquer", "vermilion_shadow", "charcoal_tile_edge", "granite", "stone_shadow", "brass"],
+        "constructionRecipe": {
+          "gateAssembly": "myojin_torii_post_nuki_kasagi",
+          "weatheringProfile": "japanese_exposed_timber",
+          "systems": ["paired inward-leaning tapered posts", "through nuki beam with wedges", "projecting shimaki and curved kasagi", "central shrine plaque", "stone pad footings"]
+        }
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/torii-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "bridge": {
+      "node": "ASSET_bridge",
+      "generator": "bridge",
+      "targetHeightMeters": 2.4,
+      "collider": {
+        "type": "box",
+        "centerMeters": [0, 1.1, 0],
+        "sizeMeters": [16, 2.2, 3.4]
+      },
+      "source": "blender_procedural",
+      "defaultVariant": "bridge_japanese_timber_beam",
+      "variants": [{
+        "id": "bridge_japanese_timber_beam", "node": "ASSET_bridge", "status": "authored",
+        "appearanceTerms": ["bridge", "Japanese timber bridge", "garden bridge", "warm plank deck", "dark timber rails", "cross-braced railing", "stone abutments", "stone piers", "capped posts"],
+        "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "granite", "stone_shadow"],
+        "constructionRecipe": {
+          "bridgeAssembly": "japanese_timber_stringer_deck_rail_stone_support",
+          "weatheringProfile": "timber_bridge_exposed",
+          "systems": ["twenty transverse deck courses", "four longitudinal stringers", "five underside cross beams", "paired stone abutments and intermediate piers", "post-and-rail side frames", "alternating diagonal rail braces", "gently crowned top rails", "tapered end-post caps"],
+          "authoredDimensions": {"spanMeters": 16, "deckWidthMeters": 3.4, "structuralHeightMeters": 2.4, "usableCrossingAxis": "+X", "longitudinalStringerCount": 4, "transverseDeckCourseCount": 20, "railingPostCount": 12},
+          "geometryGuarantees": ["deck is separate transverse courses rather than one stretched slab", "multiple longitudinal stringers and cross beams are visible from oblique and underside views", "rails combine posts, lower rails, crowned top rails, and alternating diagonal braces", "stone abutments and two intermediate piers visibly support the timber load path"]
+        }
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/bridge-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "dragon": {
+      "node": "ASSET_dragon", "generator": "dragon", "targetHeightMeters": 6.2,
+      "collider": {"type": "box", "centerMeters": [0.2, 3.1, 0], "sizeMeters": [12.7, 6.2, 9.7]},
+      "source": "blender_procedural", "defaultVariant": "dragon_massive_coiled_wyvern",
+      "variants": [{
+        "id": "dragon_massive_coiled_wyvern", "node": "ASSET_dragon", "status": "authored",
+        "appearanceTerms": ["massive dragon", "coiled dragon", "winged wyvern", "desert dragon", "long serpentine tail", "horned head", "broad membrane wings"],
+        "materialIds": ["dragon_scale_umber", "dragon_belly_ochre", "dragon_wing_membrane", "stone_shadow", "brass"],
+        "constructionRecipe": {"creatureAssembly": "dragon_coiled_wyvern_winged", "weatheringProfile": "organic_sheltered", "systems": ["long segmented coiled body", "raised neck and horned head", "paired membrane wings with spar bones", "four grounded legs and claws", "dorsal spine rhythm"], "authoredDimensions": {"targetHeightMeters": 6.2, "bodyLengthMeters": 11.4, "wingSpanMeters": 8.3}},
+        "provenance": {"paperPages": [34], "researchReferenceIds": ["worldclaw_paper_2608_05248"], "note": "Original massive dragon silhouette authored to satisfy the retained Figure 11 family."}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/dragon-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "windmill": {
+      "node": "ASSET_windmill", "generator": "windmill", "targetHeightMeters": 9.5,
+      "collider": {"type": "box", "centerMeters": [0, 4.75, 0], "sizeMeters": [8.5, 9.5, 4.6]},
+      "source": "blender_procedural", "defaultVariant": "windmill_masonry_four_sail",
+      "variants": [{
+        "id": "windmill_masonry_four_sail", "node": "ASSET_windmill", "status": "authored",
+        "appearanceTerms": ["windmill", "medieval windmill", "masonry windmill tower", "four cloth sails", "timber sail lattice", "village mill"],
+        "materialIds": ["granite", "stone_shadow", "limestone_trim", "timber_structural_dark", "timber_warm", "sail_canvas", "track_steel", "weathered_thatch_ridge"],
+        "constructionRecipe": {"propAssembly": "windmill_masonry_tower_four_sail", "weatheringProfile": "masonry_temperate", "systems": ["battered coursed masonry tower", "weathered cap roof", "front hub and axle", "four radial timber spars", "lattice sail rungs", "four broad cloth sail panels"], "authoredDimensions": {"targetHeightMeters": 9.5, "sailDiameterMeters": 8.5}},
+        "provenance": {"paperPages": [32], "researchReferenceIds": ["worldclaw_paper_2608_05248", "nps_windmills_american_plains", "nps_sagamore_windmill_hsr"], "note": "Four-sail European village silhouette based on official historic vocabulary."}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/windmill-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "mine": {
+      "node": "ASSET_mine", "generator": "mine", "targetHeightMeters": 8,
+      "collider": {"type": "box", "centerMeters": [1.16, 4, 0], "sizeMeters": [12.4, 8, 4.2]},
+      "source": "blender_procedural", "defaultVariant": "mine_headframe_hoist",
+      "variants": [{
+        "id": "mine_headframe_hoist", "node": "ASSET_mine", "status": "authored",
+        "appearanceTerms": ["mine", "mine structure", "mine headframe", "shaft headgear", "paired sheave wheels", "hoist shed", "ore cart", "gemstone mining site"],
+        "materialIds": ["gunmetal", "track_steel", "rust_oxide", "concrete_warm", "concrete_dark", "obsidian", "brass"],
+        "constructionRecipe": {"industrialAssembly": "mine_headframe_sheave_hoist_rail", "weatheringProfile": "vehicle_field", "systems": ["four battered lattice legs", "cross-braced headframe", "paired sheave wheels", "shaft collar and dark opening", "hoist shed and winding drum", "rail approach and ore cart"], "authoredDimensions": {"targetHeightMeters": 8, "headframeWidthMeters": 3.4}},
+        "provenance": {"paperPages": [37], "researchReferenceIds": ["worldclaw_paper_2608_05248"], "note": "Reusable mine headframe and hoist process node for the terraced excavation case."}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/mine-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "crystal": {
+      "node": "ASSET_crystal", "generator": "crystal", "targetHeightMeters": 4.2,
+      "collider": {"type": "sphere", "centerMeters": [-0.19, 2.1, -0.07], "radiusMeters": 2.9},
+      "source": "blender_procedural", "defaultVariant": "crystal_gemstone_cluster",
+      "variants": [{
+        "id": "crystal_gemstone_cluster", "node": "ASSET_crystal", "status": "authored",
+        "appearanceTerms": ["crystal", "gemstone deposit", "gemstone seam", "faceted crystal cluster", "cyan gemstone", "violet crystal", "exposed deposit"],
+        "materialIds": ["crystal_cyan", "crystal_violet", "crystal_pale_core", "granite", "stone_shadow"],
+        "constructionRecipe": {"earthworkAssembly": "gemstone_matrix_faceted_cluster", "weatheringProfile": "organic_sheltered", "systems": ["grounded rock matrix", "six individually faceted gemstone shafts", "separate pointed crystal caps", "contrasting highlight cores"], "authoredDimensions": {"targetHeightMeters": 4.2, "crystalCount": 6}},
+        "provenance": {"paperPages": [37], "researchReferenceIds": ["worldclaw_paper_2608_05248"], "note": "Original gemstone cluster derived from the retained exposed-deposit visual family."}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/crystal-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "antenna": {
+      "node": "ASSET_antenna", "generator": "antenna", "targetHeightMeters": 11,
+      "collider": {"type": "box", "centerMeters": [0, 5.5, 0], "sizeMeters": [4.2, 11, 4.2]},
+      "source": "blender_procedural", "defaultVariant": "antenna_lattice_communications_array",
+      "variants": [{
+        "id": "antenna_lattice_communications_array", "node": "ASSET_antenna", "status": "authored",
+        "appearanceTerms": ["antenna", "communications structure", "communications outpost", "lattice mast", "parabolic dish", "radio tower", "high-tech communications array"],
+        "materialIds": ["tech_signal_red", "tech_ceramic_white", "tech_cyan_accent", "gunmetal", "track_steel", "concrete_dark", "brass"],
+        "constructionRecipe": {"communicationsAssembly": "lattice_mast_parabolic_dish_feed", "weatheringProfile": "vehicle_field", "systems": ["four anchored tapering lattice legs", "horizontal ring frames and diagonal braces", "central antenna mast", "primary and secondary parabolic dishes", "feed arm and horn", "ground equipment cabinets"], "authoredDimensions": {"targetHeightMeters": 11, "primaryDishDiameterMeters": 3.5}},
+        "provenance": {"paperPages": [15, 16], "researchReferenceIds": ["worldclaw_paper_2608_05248", "nasa_ground_station_components"], "note": "Direct semantic communications structure with official parabolic reflector and feed logic."}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/antenna-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "satellite": {
+      "node": "ASSET_satellite", "generator": "satellite", "targetHeightMeters": 7.2,
+      "collider": {"type": "box", "centerMeters": [0.34, 3.6, 0], "sizeMeters": [7.5, 7.2, 7.5]},
+      "source": "blender_procedural", "defaultVariant": "satellite_ground_station_dish",
+      "variants": [{
+        "id": "satellite_ground_station_dish", "node": "ASSET_satellite", "status": "authored",
+        "appearanceTerms": ["satellite", "satellite ground station", "radar dish", "large parabolic reflector", "tracking pedestal", "communications facility equipment"],
+        "materialIds": ["tech_signal_red", "tech_ceramic_white", "tech_cyan_accent", "gunmetal", "track_steel", "concrete_dark"],
+        "constructionRecipe": {"communicationsAssembly": "ground_station_pedestal_yoke_reflector", "weatheringProfile": "vehicle_field", "systems": ["circular concrete foundation", "azimuth pedestal", "elevation yoke", "large parabolic reflector", "feed support truss and horn", "three service cabinets"], "authoredDimensions": {"targetHeightMeters": 7.2, "dishDiameterMeters": 6.7}},
+        "provenance": {"paperPages": [16], "researchReferenceIds": ["worldclaw_paper_2608_05248", "nasa_ground_station_components", "nasa_berkeley_ground_station"], "note": "Direct semantic radar and satellite ground-station equipment."}
+      }],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/satellite-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "dock": {
+      "node": "ASSET_dock", "generator": "dock", "targetHeightMeters": 2.4,
+      "collider": {"type": "box", "centerMeters": [0, 1.2, 0], "sizeMeters": [12.8, 2.4, 3.5]},
+      "source": "blender_procedural", "defaultVariant": "dock_timber_pile_jetty",
+      "variants": [{"id": "dock_timber_pile_jetty", "node": "ASSET_dock", "status": "authored", "appearanceTerms": ["dock", "harbor dock", "timber jetty", "waterfront prop", "pile pier", "ship anchorage"], "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "track_steel", "brass"], "constructionRecipe": {"propAssembly": "timber_pile_dock_stringer_deck", "weatheringProfile": "timber_bridge_exposed", "systems": ["twenty transverse deck courses", "two longitudinal stringers", "twelve driven piles", "diagonal pile braces", "four mooring bollards"]}, "provenance": {"paperPages": [13, 38], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/dock-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "tent": {
+      "node": "ASSET_tent", "generator": "tent", "targetHeightMeters": 3.4,
+      "collider": {"type": "box", "centerMeters": [0, 1.7, 0.28], "sizeMeters": [6.1, 3.4, 4.7]},
+      "source": "blender_procedural", "defaultVariant": "tent_canvas_adventure_camp",
+      "variants": [{"id": "tent_canvas_adventure_camp", "node": "ASSET_tent", "status": "authored", "appearanceTerms": ["tent", "adventure camp tent", "canvas ridge tent", "desert camp", "rope stayed shelter", "red entry flaps"], "materialIds": ["sail_canvas", "canvas_red", "timber_structural_dark", "track_steel", "tech_signal_red"], "constructionRecipe": {"propAssembly": "canvas_ridge_tent_rope_stay", "weatheringProfile": "organic_sheltered", "systems": ["triangular canvas shell", "ridge beam and end poles", "four guy ropes and pegs", "separate entry flaps", "dark interior and bedroll"]}, "provenance": {"paperPages": [34], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/tent-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "well": {
+      "node": "ASSET_well", "generator": "well", "targetHeightMeters": 4.5,
+      "collider": {"type": "box", "centerMeters": [0, 2.25, 0], "sizeMeters": [4.1, 4.5, 3.4]},
+      "source": "blender_procedural", "defaultVariant": "well_stone_crank_shelter",
+      "variants": [{"id": "well_stone_crank_shelter", "node": "ASSET_well", "status": "authored", "appearanceTerms": ["well", "village well", "stone lined well", "timber crank", "bucket", "slate shelter roof"], "materialIds": ["granite", "stone_shadow", "timber_structural_dark", "timber_warm", "blue_gray_slate", "cleft_slate_edge", "track_steel"], "constructionRecipe": {"propAssembly": "stone_well_crank_roof", "weatheringProfile": "masonry_temperate", "systems": ["three coursed stone rings", "dark well opening", "paired timber posts", "crank axle and rope spool", "bucket", "pitched slate shelter"]}, "provenance": {"paperPages": [33], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/well-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "statue": {
+      "node": "ASSET_statue", "generator": "statue", "targetHeightMeters": 6.5,
+      "collider": {"type": "box", "centerMeters": [0, 3.25, 0.6], "sizeMeters": [5.7, 6.5, 5.3]},
+      "source": "blender_procedural", "defaultVariant": "statue_volcanic_ritual_monument",
+      "variants": [{"id": "statue_volcanic_ritual_monument", "node": "ASSET_statue", "status": "authored", "appearanceTerms": ["statue", "ritual monument", "volcanic altar", "demonic monolith", "horned idol", "lava channels", "obsidian shrine"], "materialIds": ["obsidian", "lava_orange", "dragon_scale_umber", "stone_shadow", "gunmetal"], "constructionRecipe": {"propAssembly": "volcanic_ritual_monolith_horned", "weatheringProfile": "masonry_temperate", "systems": ["tiered obsidian altar", "tapered ritual monolith", "horned demon mask", "lava channels", "paired braziers and flame tongues"]}, "provenance": {"paperPages": [36], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/statue-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "fence": {
+      "node": "ASSET_fence", "generator": "fence", "targetHeightMeters": 2.8,
+      "collider": {"type": "box", "centerMeters": [0, 1.4, 0], "sizeMeters": [11, 2.8, 0.8]},
+      "source": "blender_procedural", "defaultVariant": "fence_timber_braced_gate",
+      "variants": [{"id": "fence_timber_braced_gate", "node": "ASSET_fence", "status": "authored", "appearanceTerms": ["fence", "village fence", "timber palisade", "braced gate", "compound fence", "town prop"], "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "granite", "track_steel"], "constructionRecipe": {"propAssembly": "timber_fence_braced_gate", "weatheringProfile": "exposed_timber", "systems": ["six stone-footed posts", "paired timber rails", "diagonal braces", "independent gate leaf and latch"]}, "provenance": {"paperPages": [14, 15, 35], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/fence-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "campfire": {
+      "node": "ASSET_campfire", "generator": "campfire", "targetHeightMeters": 2.8,
+      "collider": {"type": "sphere", "centerMeters": [0, 1.4, -0.18], "radiusMeters": 2.1},
+      "source": "blender_procedural", "defaultVariant": "campfire_stone_ring_tripod",
+      "variants": [{"id": "campfire_stone_ring_tripod", "node": "ASSET_campfire", "status": "authored", "appearanceTerms": ["campfire", "village prop", "adventure camp fire", "stone fire ring", "tripod kettle", "lava prop"], "materialIds": ["granite", "stone_shadow", "timber_structural_dark", "lava_orange", "brass", "track_steel"], "constructionRecipe": {"propAssembly": "campfire_stone_ring_tripod", "weatheringProfile": "organic_sheltered", "systems": ["twelve-stone fire ring", "crossed logs", "four layered flame tongues", "three-leg tripod", "hanging kettle"]}, "provenance": {"paperPages": [14, 34, 36], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/campfire-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "crate": {
+      "node": "ASSET_crate", "generator": "crate", "targetHeightMeters": 2.4,
+      "collider": {"type": "box", "centerMeters": [-0.1, 1.2, 0.04], "sizeMeters": [2.9, 2.4, 1.9]},
+      "source": "blender_procedural", "defaultVariant": "crate_supply_stack",
+      "variants": [{"id": "crate_supply_stack", "node": "ASSET_crate", "status": "authored", "appearanceTerms": ["crate", "supply crates", "village props", "construction supplies", "timber cargo", "stacked boxes"], "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "track_steel"], "constructionRecipe": {"propAssembly": "supply_crate_slat_cleat_stack", "weatheringProfile": "exposed_timber", "systems": ["three differently scaled crate bodies", "edge bands", "diagonal face cleats", "metal corner straps"]}, "provenance": {"paperPages": [13, 14, 15, 35, 37, 38], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/crate-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    },
+    "market": {
+      "node": "ASSET_market", "generator": "market", "targetHeightMeters": 4.2,
+      "collider": {"type": "box", "centerMeters": [0, 2.1, 0.22], "sizeMeters": [5.5, 4.2, 4.3]},
+      "source": "blender_procedural", "defaultVariant": "market_timber_canvas_stall",
+      "variants": [{"id": "market_timber_canvas_stall", "node": "ASSET_market", "status": "authored", "appearanceTerms": ["market", "market stall", "village props", "town props", "striped canvas awning", "produce baskets", "timber counter"], "materialIds": ["timber_structural_dark", "timber_warm", "timber_sunlit", "sail_canvas", "canvas_red", "straw_thatch", "vermilion_lacquer", "foliage_sunlit"], "constructionRecipe": {"propAssembly": "market_stall_post_beam_awning", "weatheringProfile": "exposed_timber", "systems": ["four-post timber frame", "top beams", "striped canvas awning", "counter and rear shelf", "three produce baskets"]}, "provenance": {"paperPages": [14, 35, 38], "researchReferenceIds": ["worldclaw_paper_2608_05248"]}}],
+      "evidence": {"turnaroundUri": "/worldclaw/assets/dossiers/market-turnaround.png", "contactSheetUri": "/worldclaw/assets/dossiers/worldclaw-kit-contact-sheet.png"}
+    }
+  },
+  "aliases": {
+    "palm": "palm",
+    "tree": "tree",
+    "pine": "pine",
+    "rock": "rock",
+    "boulder": "rock",
+    "cactus": "cactus",
+    "hut": "hut",
+    "house": "building",
+    "building": "building",
+    "bunker": "building",
+    "barn": "hut",
+    "tower": "watchtower",
+    "watchtower": "watchtower",
+    "ship": "ship",
+    "boat": "ship",
+    "vehicle": "tank",
+    "tank": "tank",
+    "pagoda": "pagoda",
+    "torii": "torii",
+    "bridge": "bridge",
+    "dragon": "dragon",
+    "windmill": "windmill",
+    "mine": "mine",
+    "crystal": "crystal",
+    "antenna": "antenna",
+    "satellite": "satellite",
+    "dock": "dock",
+    "tent": "tent",
+    "well": "well",
+    "statue": "statue",
+    "fence": "fence",
+    "campfire": "campfire",
+    "crate": "crate",
+    "market": "market"
+  }
+}

@@ -1,0 +1,12 @@
+# Copy this file to .xai_env and replace the placeholders.
+# .xai_env is gitignored and is loaded server-side by startup.sh.
+XAI_API_KEY="your-xai-key"
+XAI_TEXT_MODEL="grok-4.6"
+GEMINI_API_KEY="your-gemini-key"
+GEMINI_TEXT_MODEL="gemini-3.6-flash"
+GEMINI_IMAGE_MODEL="gemini-3-pro-image"
+OPENAI_API_KEY="your-openai-key"
+OPENAI_TEXT_MODEL="gpt-5.6-sol"
+OPENAI_IMAGE_MODEL="gpt-image-2"
+AI_GATEWAY_API_KEY="your-ai-gateway-key"
+CLAUDE_MODEL="anthropic/claude-opus-5"

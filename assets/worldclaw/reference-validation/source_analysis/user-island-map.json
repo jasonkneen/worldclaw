@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "sourceId": "user_reference_island_map_2026_08_11",
+  "sourceRole": "top_down_map_and_art_direction_example",
+  "originalFilename": "codex-clipboard-xwTXHt.png",
+  "dimensions": {
+    "width": 1024,
+    "height": 1024
+  },
+  "projection": "near_orthographic_top_down",
+  "observedComposition": {
+    "landform": "single rounded island with continuous pale beach rim",
+    "northWest": "high jagged rock ridge",
+    "westAndSouthWest": "dense layered forest canopy",
+    "northEast": "terraced green hill with one hero tree",
+    "east": "organized settlement around an open plaza",
+    "southEast": "circular protected harbor with radial docks and separated boats"
+  },
+  "highValueTraits": [
+    "clear coastline silhouette",
+    "large readable biome masses",
+    "organized town structure rather than scatter",
+    "hero landmarks with open negative space",
+    "boats separated and aligned to harbor geometry",
+    "terrain relief subordinate to map readability",
+    "cohesive hand-painted material language"
+  ],
+  "knownFailureSignalsFromPriorOutput": [
+    "coastline or region mirror",
+    "cropped or missing island sections",
+    "terrain spikes overpowering map structure",
+    "unmasked global water plane",
+    "boats piled together or stranded on land",
+    "vegetation obscuring town and landmark hierarchy",
+    "primitive buildings without requested construction detail"
+  ],
+  "note": "This analysis records the user-provided comparison target without copying a temporary operating-system attachment path into the project. Runtime certification compares each generated canonical map and concept sheet to its own final captures."
+}
