@@ -1,0 +1,16 @@
+{
+  "id": "unit-box",
+  "prototype": "crate",
+  "node": "ASSET_crate",
+  "status": "accepted",
+  "targetHeightMeters": 0.7,
+  "yaw": 0.7,
+  "pitch": 0.35,
+  "appearanceTerms": ["crate", "box", "supply"],
+  "materialIds": ["timber_warm"],
+  "collider": {
+    "type": "box",
+    "centerMeters": [0, 0.35, 0],
+    "sizeMeters": [0.7, 0.7, 0.7]
+  }
+}

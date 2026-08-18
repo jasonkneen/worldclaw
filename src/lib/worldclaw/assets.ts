@@ -2,11 +2,13 @@ import type {
   BrowserAssetCollider,
   BrowserAssetMetadata,
   BrowserAssetPrototype,
+  BrowserAssetSource,
   ObjectKind,
   PlacedObject,
 } from "./types";
 
 export const WORLDCLAW_ASSET_MANIFEST_URI = "/worldclaw/assets/asset-library.json";
+export const WORLDCLAW_VIBE_LIBRARY_URI = "/worldclaw/assets/vibe/library.json";
 const WORLDCLAW_ASSET_MANIFEST_TIMEOUT_MS = 10_000;
 const WORLDCLAW_ASSET_MANIFEST_MAX_BYTES = 1_000_000;
 
@@ -133,7 +135,8 @@ export interface AssetPrototypeManifest {
   generator: string;
   targetHeightMeters: number;
   collider: BrowserAssetCollider;
-  source: "blender_procedural";
+  source: BrowserAssetSource;
+  libraryUri?: string;
   defaultVariant?: string;
   variants?: AssetVariantManifest[];
   evidence?: {
@@ -490,6 +493,86 @@ export function parseWorldClawAssetManifest(value: unknown): WorldClawAssetManif
   };
 }
 
+export function parseVibeAssetLibrary(value: unknown): Partial<
+  Record<BrowserAssetPrototype, AssetPrototypeManifest>
+> {
+  if (!isRecord(value)) throw new Error("vibe library must be an object");
+  if (value.version !== 1) throw new Error("vibe library version must be 1");
+  if (!isRecord(value.prototypes)) throw new Error("vibe library prototypes must be an object");
+
+  const prototypes: Partial<Record<BrowserAssetPrototype, AssetPrototypeManifest>> = {};
+  for (const [key, raw] of Object.entries(value.prototypes)) {
+    if (!isBrowserAssetPrototype(key)) {
+      throw new Error(`vibe library prototypes.${key} is not a supported family`);
+    }
+    if (!isRecord(raw)) throw new Error(`vibe library prototypes.${key} must be an object`);
+    const node = stringField(raw.node, `vibe.prototypes.${key}.node`);
+    if (node !== `ASSET_${key}`) {
+      throw new Error(`vibe library prototypes.${key}.node must be ASSET_${key}`);
+    }
+    if (raw.source !== "vibe_model") {
+      throw new Error(`vibe library prototypes.${key}.source must be vibe_model`);
+    }
+    const libraryUri = stringField(raw.libraryUri, `vibe.prototypes.${key}.libraryUri`);
+    if (!libraryUri.startsWith("/worldclaw/assets/vibe/") || !libraryUri.toLowerCase().endsWith(".glb")) {
+      throw new Error(`vibe library prototypes.${key}.libraryUri must be a vibe GLB path`);
+    }
+    prototypes[key] = {
+      node,
+      generator: stringField(raw.generator, `vibe.prototypes.${key}.generator`),
+      targetHeightMeters: finitePositive(
+        raw.targetHeightMeters,
+        `vibe.prototypes.${key}.targetHeightMeters`,
+      ),
+      collider: parseCollider(raw.collider, `vibe.prototypes.${key}.collider`),
+      source: "vibe_model",
+      libraryUri,
+      defaultVariant: optionalString(raw.defaultVariant),
+      variants: (Array.isArray(raw.variants) ? raw.variants : [])
+        .slice(0, 8)
+        .filter(isRecord)
+        .map((variant, index) => ({
+          id: stringField(variant.id, `vibe.prototypes.${key}.variants.${index}.id`),
+          node: stringField(variant.node, `vibe.prototypes.${key}.variants.${index}.node`),
+          status: stringField(variant.status, `vibe.prototypes.${key}.variants.${index}.status`),
+          appearanceTerms: optionalStringArray(variant.appearanceTerms, 32),
+          materialIds: optionalStringArray(variant.materialIds, 32),
+        })),
+    };
+  }
+  return prototypes;
+}
+
+export function mergeVibeAssetLibrary(
+  manifest: WorldClawAssetManifest,
+  vibePrototypes: Partial<Record<BrowserAssetPrototype, AssetPrototypeManifest>>,
+): WorldClawAssetManifest {
+  if (Object.keys(vibePrototypes).length === 0) return manifest;
+  return {
+    ...manifest,
+    prototypes: {
+      ...manifest.prototypes,
+      ...vibePrototypes,
+    },
+  };
+}
+
+async function loadOptionalVibeLibrary(
+  signal: AbortSignal,
+): Promise<Partial<Record<BrowserAssetPrototype, AssetPrototypeManifest>> | null> {
+  try {
+    const response = await fetch(WORLDCLAW_VIBE_LIBRARY_URI, {
+      headers: { accept: "application/json" },
+      signal,
+    });
+    if (response.status === 404 || !response.ok) return null;
+    const text = await readBoundedResponseText(response, WORLDCLAW_ASSET_MANIFEST_MAX_BYTES);
+    return parseVibeAssetLibrary(JSON.parse(text));
+  } catch {
+    return null;
+  }
+}
+
 export async function loadWorldClawAssetManifest(
   manifestUri = WORLDCLAW_ASSET_MANIFEST_URI,
   signal?: AbortSignal,
@@ -507,10 +590,15 @@ export async function loadWorldClawAssetManifest(
         return { status: "unavailable", manifestUri, error: `HTTP ${response.status}` };
       }
       const text = await readBoundedResponseText(response, WORLDCLAW_ASSET_MANIFEST_MAX_BYTES);
+      let manifest = parseWorldClawAssetManifest(JSON.parse(text));
+      if (manifestUri === WORLDCLAW_ASSET_MANIFEST_URI) {
+        const vibe = await loadOptionalVibeLibrary(fetchSignal);
+        if (vibe) manifest = mergeVibeAssetLibrary(manifest, vibe);
+      }
       return {
         status: "loaded",
         manifestUri,
-        manifest: parseWorldClawAssetManifest(JSON.parse(text)),
+        manifest,
       };
     } catch (error) {
       if (signal?.aborted) throw error;
@@ -627,7 +715,7 @@ export function resolveBrowserAsset(
   const variant = selectAssetVariant(definition, appearance);
   return {
     prototype,
-    uri: manifest.library.uri,
+    uri: definition.libraryUri ?? manifest.library.uri,
     node: variant?.node ?? definition.node,
     source: definition.source,
     targetHeightMeters: variant?.targetHeightMeters ?? definition.targetHeightMeters,

@@ -272,12 +272,14 @@ export type BrowserAssetCollider =
       radiusMeters: number;
     };
 
-/** Browser-ready reference emitted by the offline Blender asset compiler. */
+/** Browser-ready reference emitted by the offline asset compilers. */
+export type BrowserAssetSource = "blender_procedural" | "vibe_model";
+
 export interface BrowserAssetMetadata {
   prototype: BrowserAssetPrototype;
   uri: string;
   node: string;
-  source: "blender_procedural";
+  source: BrowserAssetSource;
   targetHeightMeters: number;
   collider: BrowserAssetCollider;
   variantId?: string;

@@ -185,17 +185,21 @@ export function ControlPanel() {
     : null;
   const assetProvenance = useMemo(() => {
     let blenderPrototypeInstances = 0;
+    let vibePrototypeInstances = 0;
     const libraryUris = new Set<string>();
     const prototypes = new Set<string>();
     for (const object of world?.objects ?? []) {
       if (!object.browserAsset) continue;
-      blenderPrototypeInstances++;
+      if (object.browserAsset.source === "vibe_model") vibePrototypeInstances++;
+      else blenderPrototypeInstances++;
       libraryUris.add(object.browserAsset.uri);
       prototypes.add(object.browserAsset.prototype);
     }
     return {
       blenderPrototypeInstances,
-      primitiveFallbackInstances: (world?.objects.length ?? 0) - blenderPrototypeInstances,
+      vibePrototypeInstances,
+      primitiveFallbackInstances:
+        (world?.objects.length ?? 0) - blenderPrototypeInstances - vibePrototypeInstances,
       libraryUri: [...libraryUris][0],
       prototypeCount: prototypes.size,
     };
@@ -474,6 +478,7 @@ export function ControlPanel() {
                 </p>
                 <p className="text-fg-subtle">
                   {assetProvenance.blenderPrototypeInstances} Blender GLB ·{" "}
+                  {assetProvenance.vibePrototypeInstances} vibe ·{" "}
                   {assetProvenance.primitiveFallbackInstances} primitive
                 </p>
                 {assetProvenance.libraryUri && (
@@ -501,8 +506,10 @@ export function ControlPanel() {
                 {selected.browserAsset ? (
                   <>
                     <p className="text-fg-subtle">
-                      Blender procedural · {selected.browserAsset.prototype} ·{" "}
-                      {selected.browserAsset.node}
+                      {selected.browserAsset.source === "vibe_model"
+                        ? "Vibe model"
+                        : "Blender procedural"}{" "}
+                      · {selected.browserAsset.prototype} · {selected.browserAsset.node}
                     </p>
                     <p className="text-fg-subtle">
                       {(

@@ -141,7 +141,7 @@ function InstancedPrototypeSubmesh({
       userData={{
         worldclawCompiledBatch: true,
         assetPrototype: definition.prototype,
-        assetSource: "blender_procedural",
+        assetSource: definition.objects[0]?.browserAsset?.source ?? "blender_procedural",
         submeshName: definition.submeshName,
         drawGroups: definition.drawGroups,
         instanceObjectIds: definition.objects.map((object) => object.id),

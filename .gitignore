@@ -23,6 +23,8 @@ output/
 artifacts/
 screenshots/*
 !screenshots/.gitkeep
+assets/worldclaw/prototypes/**/preview/
+scripts/vibe-model/fixtures/**/preview/
 
 # tooling caches
 .playwright-mcp/

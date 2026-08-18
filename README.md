@@ -81,6 +81,21 @@ npm run assets:build
 npm run assets:validate
 ```
 
+Hard-surface replacements use the **vibe-model** project skill
+(`.grok/skills/vibe-model`). Author `createModel` under
+`assets/worldclaw/prototypes/<id>/`, preview, then mark `accepted` and compile.
+`assets:build` writes the vibe sidecar first (`public/worldclaw/assets/vibe/`),
+then the Blender kit. Runtime overlays accepted vibe prototypes onto the
+published kit by family key. Do not change `assets/worldclaw/asset-library.json`
+to `vibe_model` — the Blender validator requires that file to stay
+`blender_procedural`. Organic families stay on the Blender path.
+
+```sh
+npm run assets:vibe:preview -- --id <model-id>
+npm run assets:vibe
+npm run assets:build
+```
+
 ## Layout
 
 | Path | What |
@@ -89,8 +104,8 @@ npm run assets:validate
 | `src/lib/worldclaw/` | Pipeline, terrain, placement, providers |
 | `src/routes/` | `/` and `/assets` |
 | `public/worldclaw/` | Published GLB, dossiers, layout maps |
-| `assets/worldclaw/` | Source manifest + paper suite contract |
-| `scripts/` | Tests, QA harnesses, Blender kit |
+| `assets/worldclaw/` | Source manifest, vibe prototypes, paper suite |
+| `scripts/` | Tests, QA harnesses, Blender kit, vibe-model compile |
 | `attachments/2608.05248v1.pdf` | Hash-locked paper PDF |
 | `docs/paper-superiority-scorecard.md` | Evaluation gates |
 | `status.md` / `progress.md` | Current position / historical run ledger |
