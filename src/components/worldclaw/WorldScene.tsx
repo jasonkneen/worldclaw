@@ -43,6 +43,10 @@ import type {
 } from "~/lib/worldclaw/types";
 
 const WALK_COLLIDER_RADIUS = 0.45;
+const WALK_FORWARD = new THREE.Vector3();
+const WALK_RIGHT = new THREE.Vector3();
+const WALK_LOOK = new THREE.Vector3();
+const WALK_POSITION = new THREE.Vector3(0, 4, 18);
 const LIVE_WALK_MINIMUM_SPAWN_CLEARANCE_METERS = 2.25;
 const LIVE_WALK_MINIMUM_FORWARD_SIGHTLINE_METERS = 7;
 const LIVE_WALK_MINIMUM_DRY_NEIGHBORHOOD_METERS = 1.5;
@@ -4869,8 +4873,27 @@ function LiveDiagnosticMaterialBridge({ world }: { world: WorldSceneType | null 
     return () => materials.dispose();
   }, [materials]);
 
-  useFrame(() => {
-    if (!world || !materials || (viewMode !== "instance" && viewMode !== "depth")) return;
+  const applied = useRef({ signature: "", meshCount: -1, checkedAt: -Infinity });
+
+  useFrame(({ clock }) => {
+    if (!world || !materials || (viewMode !== "instance" && viewMode !== "depth")) {
+      applied.current.signature = "";
+      applied.current.meshCount = -1;
+      return;
+    }
+
+    const signature = `${world.id}:${viewMode}`;
+    const elapsed = clock.elapsedTime;
+    const signatureChanged = applied.current.signature !== signature;
+    if (!signatureChanged && elapsed - applied.current.checkedAt < 0.25) return;
+
+    let meshCount = 0;
+    scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) meshCount++;
+    });
+    applied.current.checkedAt = elapsed;
+    if (!signatureChanged && applied.current.meshCount === meshCount) return;
+
     scene.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;
       if (
@@ -4901,6 +4924,8 @@ function LiveDiagnosticMaterialBridge({ world }: { world: WorldSceneType | null 
           ? materials.linearDepth
           : (materials.instanceByLogicalId.get(logicalId) ?? materials.compiledInstance);
     });
+    applied.current.signature = signature;
+    applied.current.meshCount = meshCount;
   });
 
   return null;
@@ -5063,7 +5088,7 @@ function SceneQaProbe({ world }: { world: WorldSceneType | null }) {
     const frameCalls = gl.info.render.calls;
     const frameTriangles = gl.info.render.triangles;
     gl.info.reset();
-    const elapsed = clock.getElapsedTime();
+    const elapsed = clock.elapsedTime;
     if (elapsed - lastUpdate.current < 0.25) return;
     lastUpdate.current = elapsed;
     camera.getWorldDirection(forward);
@@ -5620,7 +5645,7 @@ function WalkController({ enabled, world }: { enabled: boolean; world: WorldScen
   const keys = useRef<Record<string, boolean>>({});
   const yaw = useRef(0);
   const pitch = useRef(0.12);
-  const pos = useRef(new THREE.Vector3(0, 4, 18));
+  const pos = useRef(WALK_POSITION);
   const primed = useRef(false);
   const safeSpawnCandidate = useRef<number | null>(null);
   const safeSpawnAccepted = useRef(false);
@@ -5721,80 +5746,77 @@ function WalkController({ enabled, world }: { enabled: boolean; world: WorldScen
 
   useFrame((_, rawDelta) => {
     if (!enabled) return;
+    const position = pos.current;
     const delta = Math.min(rawDelta, 0.05);
     const speed = (keys.current["ShiftLeft"] || keys.current["ShiftRight"] ? 24 : 12) * delta;
 
     // A = left, D = right (local)
-    const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
-    const right = new THREE.Vector3(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
+    WALK_FORWARD.set(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
+    WALK_RIGHT.set(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
 
     let proposedX = 0;
     let proposedZ = 0;
     if (keys.current["KeyW"] || keys.current["ArrowUp"]) {
-      proposedX += forward.x * speed;
-      proposedZ += forward.z * speed;
+      proposedX += WALK_FORWARD.x * speed;
+      proposedZ += WALK_FORWARD.z * speed;
     }
     if (keys.current["KeyS"] || keys.current["ArrowDown"]) {
-      proposedX -= forward.x * speed;
-      proposedZ -= forward.z * speed;
+      proposedX -= WALK_FORWARD.x * speed;
+      proposedZ -= WALK_FORWARD.z * speed;
     }
     if (keys.current["KeyA"] || keys.current["ArrowLeft"]) {
-      proposedX -= right.x * speed;
-      proposedZ -= right.z * speed;
+      proposedX -= WALK_RIGHT.x * speed;
+      proposedZ -= WALK_RIGHT.z * speed;
     }
     if (keys.current["KeyD"] || keys.current["ArrowRight"]) {
-      proposedX += right.x * speed;
-      proposedZ += right.z * speed;
+      proposedX += WALK_RIGHT.x * speed;
+      proposedZ += WALK_RIGHT.z * speed;
     }
 
     const resolution = resolveCircleMovementXZ({
-      start: [pos.current.x, pos.current.z],
+      start: [position.x, position.z],
       delta: [proposedX, proposedZ],
       radius: WALK_COLLIDER_RADIUS,
       colliders,
       worldHalfExtent,
     });
-    pos.current.x = resolution.position[0];
-    pos.current.z = resolution.position[1];
-    telemetry.current = {
-      enabled: true,
-      radius: WALK_COLLIDER_RADIUS,
-      worldHalfExtent,
-      safeSpawnCandidate: safeSpawnCandidate.current,
-      safeSpawnAccepted: safeSpawnAccepted.current,
-      spawnYawRadians: telemetry.current.spawnYawRadians,
-      forwardClearanceMeters: telemetry.current.forwardClearanceMeters,
-      dryGroundAccepted: telemetry.current.dryGroundAccepted,
-      collidedIds: resolution.collidedIds,
-      unresolvedIds: resolution.unresolvedIds,
-      boundsClamped: resolution.boundsClamped,
-    };
-    scene.userData.worldclawWalkTelemetry = telemetry.current;
+    position.x = resolution.position[0];
+    position.z = resolution.position[1];
+    const walkTelemetry = telemetry.current;
+    walkTelemetry.enabled = true;
+    walkTelemetry.radius = WALK_COLLIDER_RADIUS;
+    walkTelemetry.worldHalfExtent = worldHalfExtent;
+    walkTelemetry.safeSpawnCandidate = safeSpawnCandidate.current;
+    walkTelemetry.safeSpawnAccepted = safeSpawnAccepted.current;
+    walkTelemetry.collidedIds = resolution.collidedIds;
+    walkTelemetry.unresolvedIds = resolution.unresolvedIds;
+    walkTelemetry.boundsClamped = resolution.boundsClamped;
+    scene.userData.worldclawWalkTelemetry = walkTelemetry;
 
     // Fly boost with Q/E still available
-    if (keys.current["KeyQ"]) pos.current.y += speed;
-    if (keys.current["KeyE"]) pos.current.y -= speed;
+    if (keys.current["KeyQ"]) position.y += speed;
+    if (keys.current["KeyE"]) position.y -= speed;
 
     // Snap to terrain when not flying
     if (world && !keys.current["KeyQ"] && !keys.current["KeyE"]) {
-      const th = sampleHeight(world.heightField, pos.current.x, pos.current.z);
+      const th = sampleHeight(world.heightField, position.x, position.z);
       const targetY = Math.max(th + 1.65, 0.5);
-      pos.current.y += (targetY - pos.current.y) * Math.min(1, 10 * delta);
+      position.y += (targetY - position.y) * Math.min(1, 10 * delta);
     }
 
-    pos.current.y = Math.max(0.5, Math.min(45, pos.current.y));
+    position.y = Math.max(0.5, Math.min(45, position.y));
     if (keys.current["KeyJ"]) yaw.current += 1.5 * delta;
     if (keys.current["KeyL"]) yaw.current -= 1.5 * delta;
     if (keys.current["KeyI"]) pitch.current = Math.min(1.2, pitch.current + 1.1 * delta);
     if (keys.current["KeyK"]) pitch.current = Math.max(-1.2, pitch.current - 1.1 * delta);
 
-    camera.position.copy(pos.current);
-    const look = new THREE.Vector3(
-      pos.current.x - Math.sin(yaw.current) * Math.cos(pitch.current),
-      pos.current.y + Math.sin(pitch.current),
-      pos.current.z - Math.cos(yaw.current) * Math.cos(pitch.current),
+    camera.position.copy(position);
+    WALK_LOOK.set(
+      position.x - Math.sin(yaw.current) * Math.cos(pitch.current),
+      position.y + Math.sin(pitch.current),
+      position.z - Math.cos(yaw.current) * Math.cos(pitch.current),
     );
-    camera.lookAt(look);
+    camera.lookAt(WALK_LOOK);
   });
 
   return null;
@@ -5866,14 +5888,14 @@ function SceneContent({ world }: { world: WorldSceneType }) {
         ]}
       />
       {/* normalBias is in WORLD units: keep it at ~1-2 shadow texels
-          (140-unit span / 3072 map ≈ 0.046/texel) so small props keep
+          (140-unit span / 2048 map ≈ 0.068/texel) so small props keep
           contact shadows instead of peter-panning. */}
       <directionalLight
         castShadow
         position={sunPos}
         intensity={theme === "desert" ? 1.65 : theme === "volcanic" ? 0.95 : 1.3}
-        shadow-mapSize-width={3072}
-        shadow-mapSize-height={3072}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
         shadow-camera-far={220}
         shadow-camera-left={-70}
         shadow-camera-right={70}

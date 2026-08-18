@@ -98,7 +98,7 @@ const PRIMITIVE_APPROXIMATIONS: Partial<
   boat: { shape: "box", width: 2.2, depth: 0.9, height: 0.7, centerY: 0.35 },
   vehicle: { shape: "box", width: 1.8, depth: 1.1, height: 0.8, centerY: 0.4 },
   tank: { shape: "box", width: 2.1, depth: 1.4, height: 1.1, centerY: 0.55 },
-  tree: { shape: "circle", radius: 0.3, height: 2.7, centerY: 1.35 },
+  tree: { shape: "circle", radius: 0.75, height: 2.7, centerY: 1.35 },
   palm: { shape: "circle", radius: 0.3, height: 3, centerY: 1.5 },
   pine: { shape: "circle", radius: 0.34, height: 3.1, centerY: 1.55 },
   cactus: { shape: "circle", radius: 0.32, height: 2, centerY: 1 },

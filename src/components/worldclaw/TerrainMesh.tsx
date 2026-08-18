@@ -413,7 +413,7 @@ export function WaterPlane({
     // height mesh so ocean regions read as water, not blue-black terrain
     // spikes. No transmission: it would render the scene twice per frame.
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, y, 0]} receiveShadow renderOrder={10}>
-      <planeGeometry args={[worldSize * 4, worldSize * 4, 64, 64]} />
+      <planeGeometry args={[worldSize * 4, worldSize * 4, 1, 1]} />
       <primitive object={material} attach="material" />
     </mesh>
   );
