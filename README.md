@@ -100,3 +100,7 @@ Not in git: `.vercel/`, `output/`, `artifacts/`, `screenshots/`, `node_modules/`
 ## Paper
 
 Chen et al., *WorldClaw: Agentic 3D Open-World Generation at Scale*, [arXiv:2608.05248](https://arxiv.org/abs/2608.05248). Case list and page hashes live in `assets/worldclaw/reference-validation/paper_prompt_suite.json`.
+
+## License
+
+[MIT](LICENSE) © 2026 Jason Kneen
